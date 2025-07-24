@@ -17,3 +17,4 @@ razorpay
 cloudinary
 pusher
 python-dotenv
+google-generativeai
