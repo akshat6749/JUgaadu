@@ -4778,3 +4778,92 @@ Watching for file changes with StatReloader
 HTTP/2 support not enabled (install the http2 and tls Twisted extras)
 Configuring endpoint tcp:port=8000:interface=127.0.0.1
 Listening on TCP address 127.0.0.1:8000
+Watching for file changes with StatReloader
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+Unauthorized: /api/categories/
+[31;1mHTTP GET /api/categories/ 401 [0.02, 127.0.0.1:13181][0m
+[mHTTP GET /api/products/?ordering=-created_at&page=1&page_size=12 200 [0.03, 127.0.0.1:13182][0m
+Unauthorized: /api/categories/
+[31;1mHTTP GET /api/categories/ 401 [0.01, 127.0.0.1:13194][0m
+[mHTTP GET /api/products/?ordering=-created_at&page=1&page_size=12 200 [0.02, 127.0.0.1:13195][0m
+Unauthorized: /api/categories/
+[31;1mHTTP GET /api/categories/ 401 [0.01, 127.0.0.1:13194][0m
+[mHTTP GET /api/products/?ordering=-created_at&page=1&page_size=12 200 [0.01, 127.0.0.1:13195][0m
+[mHTTP OPTIONS /api/auth/register/ 200 [0.00, 127.0.0.1:13195][0m
+[mHTTP POST /api/auth/register/ 201 [0.46, 127.0.0.1:13195][0m
+[mHTTP OPTIONS /api/products/wishlist/count/ 200 [0.01, 127.0.0.1:13195][0m
+[mHTTP OPTIONS /api/categories/ 200 [0.00, 127.0.0.1:13197][0m
+[mHTTP OPTIONS /api/chat/messages/unread-count/ 200 [0.01, 127.0.0.1:13194][0m
+[mHTTP OPTIONS /api/products/?ordering=-created_at&page=1&page_size=12 200 [0.01, 127.0.0.1:13198][0m
+[mHTTP OPTIONS /api/products/wishlist/count/ 200 [0.01, 127.0.0.1:13195][0m
+[mHTTP OPTIONS /api/chat/messages/unread-count/ 200 [0.00, 127.0.0.1:13197][0m
+[mHTTP OPTIONS /api/categories/ 200 [0.01, 127.0.0.1:13194][0m
+[mHTTP OPTIONS /api/products/?ordering=-created_at&page=1&page_size=12 200 [0.00, 127.0.0.1:13198][0m
+[mHTTP GET /api/products/wishlist/count/ 200 [0.03, 127.0.0.1:13195][0m
+[mHTTP GET /api/categories/ 200 [0.03, 127.0.0.1:13197][0m
+[mHTTP GET /api/products/?ordering=-created_at&page=1&page_size=12 200 [0.04, 127.0.0.1:13194][0m
+[mHTTP GET /api/chat/messages/unread-count/ 200 [0.04, 127.0.0.1:13198][0m
+[mHTTP GET /api/products/wishlist/count/ 200 [0.03, 127.0.0.1:13195][0m
+[mHTTP GET /api/categories/ 200 [0.03, 127.0.0.1:13197][0m
+[mHTTP GET /api/chat/messages/unread-count/ 200 [0.03, 127.0.0.1:13198][0m
+[mHTTP GET /api/products/?ordering=-created_at&page=1&page_size=12 200 [0.03, 127.0.0.1:13194][0m
+[mHTTP OPTIONS /api/auth/user/ 200 [0.00, 127.0.0.1:13194][0m
+[mHTTP GET /api/auth/user/ 200 [0.01, 127.0.0.1:13194][0m
+[mHTTP GET /api/chat/messages/unread-count/ 200 [0.02, 127.0.0.1:13195][0m
+[mHTTP GET /api/products/?ordering=-created_at&page=1&page_size=12 200 [0.02, 127.0.0.1:13198][0m
+[mHTTP GET /api/products/wishlist/count/ 200 [0.03, 127.0.0.1:13197][0m
+[mHTTP GET /api/categories/ 200 [0.03, 127.0.0.1:13194][0m
+[mHTTP GET /api/chat/messages/unread-count/ 200 [0.01, 127.0.0.1:13197][0m
+[mHTTP GET /api/products/wishlist/count/ 200 [0.01, 127.0.0.1:13194][0m
+[mHTTP GET /api/products/wishlist/count/ 200 [0.01, 127.0.0.1:13194][0m
+[mHTTP GET /api/chat/messages/unread-count/ 200 [0.01, 127.0.0.1:13197][0m
+[mHTTP GET /api/products/wishlist/count/ 200 [0.02, 127.0.0.1:13197][0m
+[mHTTP GET /api/chat/messages/unread-count/ 200 [0.02, 127.0.0.1:13194][0m
+[mHTTP GET /api/products/wishlist/count/ 200 [0.02, 127.0.0.1:13197][0m
+[mHTTP GET /api/chat/messages/unread-count/ 200 [0.02, 127.0.0.1:13194][0m
+[mHTTP GET /api/products/wishlist/count/ 200 [0.01, 127.0.0.1:13194][0m
+[mHTTP GET /api/chat/messages/unread-count/ 200 [0.01, 127.0.0.1:13197][0m
+[mHTTP GET /api/chat/messages/unread-count/ 200 [0.01, 127.0.0.1:13194][0m
+[mHTTP GET /api/products/wishlist/count/ 200 [0.01, 127.0.0.1:13197][0m
+[mHTTP GET /api/chat/messages/unread-count/ 200 [0.01, 127.0.0.1:13197][0m
+[mHTTP GET /api/products/wishlist/count/ 200 [0.01, 127.0.0.1:13194][0m
+[mHTTP GET /api/products/wishlist/count/ 200 [0.01, 127.0.0.1:13194][0m
+[mHTTP GET /api/chat/messages/unread-count/ 200 [0.01, 127.0.0.1:13197][0m
+[mHTTP GET /api/chat/messages/unread-count/ 200 [0.01, 127.0.0.1:13197][0m
+[mHTTP GET /api/products/wishlist/count/ 200 [0.01, 127.0.0.1:13194][0m
+C:\Users\AJ\OneDrive\Desktop\CampusMart\backend\products\views.py changed, reloading.
+Watching for file changes with StatReloader
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+[mHTTP GET /api/products/wishlist/count/ 200 [0.02, 127.0.0.1:13247][0m
+[mHTTP GET /api/chat/messages/unread-count/ 200 [0.02, 127.0.0.1:13248][0m
+C:\Users\AJ\OneDrive\Desktop\CampusMart\backend\products\views.py changed, reloading.
+Watching for file changes with StatReloader
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+[mHTTP GET /api/products/wishlist/count/ 200 [0.01, 127.0.0.1:13263][0m
+[mHTTP GET /api/chat/messages/unread-count/ 200 [0.01, 127.0.0.1:13263][0m
+[mHTTP GET /api/chat/messages/unread-count/ 200 [0.02, 127.0.0.1:13262][0m
+[mHTTP GET /api/categories/ 200 [0.02, 127.0.0.1:13261][0m
+[mHTTP GET /api/products/wishlist/count/ 200 [0.03, 127.0.0.1:13263][0m
+[mHTTP GET /api/chat/messages/unread-count/ 200 [0.02, 127.0.0.1:13261][0m
+[mHTTP GET /api/products/?ordering=-created_at&page=1&page_size=12 200 [0.03, 127.0.0.1:13262][0m
+[mHTTP GET /api/categories/ 200 [0.02, 127.0.0.1:13263][0m
+[mHTTP GET /api/products/wishlist/count/ 200 [0.02, 127.0.0.1:13261][0m
+[mHTTP GET /api/products/?ordering=-created_at&page=1&page_size=12 200 [0.02, 127.0.0.1:13262][0m
+[mHTTP GET /api/categories/ 200 [0.01, 127.0.0.1:13262][0m
+[mHTTP GET /api/categories/ 200 [0.01, 127.0.0.1:13263][0m
+[mHTTP GET /api/products/?ordering=-created_at&page=1&page_size=12 200 [0.03, 127.0.0.1:13261][0m
+[mHTTP GET /api/products/?ordering=-created_at&page=1&page_size=12 200 [0.01, 127.0.0.1:13263][0m
+[mHTTP GET /api/categories/ 200 [0.02, 127.0.0.1:13263][0m
+[mHTTP GET /api/products/?ordering=-created_at&page=1&page_size=12 200 [0.02, 127.0.0.1:13261][0m
+[mHTTP GET /api/products/1/ 200 [0.02, 127.0.0.1:13261][0m
+[mHTTP GET /api/products/1/ 200 [0.02, 127.0.0.1:13263][0m
+[mHTTP GET /api/products/?ordering=-created_at&page=1&page_size=12 200 [0.02, 127.0.0.1:13261][0m
+[mHTTP GET /api/categories/ 200 [0.02, 127.0.0.1:13263][0m
+[mHTTP GET /api/products/?ordering=-created_at&page=1&page_size=12 200 [0.02, 127.0.0.1:13262][0m
+[mHTTP GET /api/categories/ 200 [0.02, 127.0.0.1:13261][0m

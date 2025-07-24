@@ -1,6 +1,6 @@
 from rest_framework import generics, status, filters
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly,AllowAny
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from django.db.models import Exists, OuterRef, Value, BooleanField
@@ -143,6 +143,7 @@ class UserProductsView(generics.ListAPIView):
         ).order_by('-created_at')
 
 class CategoryListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Category.objects.filter(is_active=True)
     serializer_class = CategorySerializer
 
