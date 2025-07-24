@@ -1,6 +1,6 @@
 # JUgaadu - A Hyperlocal Marketplace
 
-JUgaadu is a full-stack web application that creates a hyperlocal marketplace for users to buy and sell products. It connects local communities, allowing users to discover products from nearby sellers, engage in real-time chat for negotiations, and complete transactions securely.
+JUgaadu is a full-stack web application that creates a hyperlocal marketplace for JU students to buy and sell products. It connects our campus, allowing users to discover products from nearby sellers, engage in real-time chat for negotiations, and complete transactions securely.
 
 ## 🚀 Features
 
