@@ -18,3 +18,4 @@ cloudinary
 pusher
 python-dotenv
 google-generativeai
+django-cloudinary-storage

@@ -4774,3 +4774,7 @@ Unauthorized: /api/categories/
 [mHTTP GET /api/chat/messages/unread-count/ 200 [0.04, 127.0.0.1:1878][0m
 [mHTTP GET /api/products/wishlist/count/ 200 [0.04, 127.0.0.1:1920][0m
 [mHTTP GET /api/chat/messages/unread-count/ 200 [0.04, 127.0.0.1:1921][0m
+Watching for file changes with StatReloader
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
