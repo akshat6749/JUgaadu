@@ -19,3 +19,5 @@ pusher
 python-dotenv
 google-generativeai
 django-cloudinary-storage
+django-redis
+django-ratelimit

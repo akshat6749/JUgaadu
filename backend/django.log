@@ -4867,3 +4867,27 @@ Listening on TCP address 127.0.0.1:8000
 [mHTTP GET /api/categories/ 200 [0.02, 127.0.0.1:13263][0m
 [mHTTP GET /api/products/?ordering=-created_at&page=1&page_size=12 200 [0.02, 127.0.0.1:13262][0m
 [mHTTP GET /api/categories/ 200 [0.02, 127.0.0.1:13261][0m
+Watching for file changes with StatReloader
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+[mHTTP GET /api/products/?ordering=-created_at&page=1&page_size=12 200 [0.04, 127.0.0.1:11639][0m
+[mHTTP GET /api/categories/ 200 [0.05, 127.0.0.1:11638][0m
+Watching for file changes with StatReloader
+C:\Users\AJ\OneDrive\Desktop\CampusMart\backend\users\views.py changed, reloading.
+Watching for file changes with StatReloader
+C:\Users\AJ\OneDrive\Desktop\CampusMart\backend\users\views.py changed, reloading.
+Watching for file changes with StatReloader
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+C:\Users\AJ\OneDrive\Desktop\CampusMart\backend\users\views.py changed, reloading.
+Watching for file changes with StatReloader
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000
+C:\Users\AJ\OneDrive\Desktop\CampusMart\backend\users\views.py changed, reloading.
+Watching for file changes with StatReloader
+HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+Configuring endpoint tcp:port=8000:interface=127.0.0.1
+Listening on TCP address 127.0.0.1:8000

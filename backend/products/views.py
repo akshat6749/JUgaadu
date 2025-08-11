@@ -13,8 +13,10 @@ from django.conf import settings
 import razorpay
 from .models import Payment
 from .serializers import PaymentSerializer
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 # Note: We are now handling filtering manually, so ProductFilter is no longer used here.
-
+@method_decorator(cache_page(60 * 2), name='dispatch') 
 class ProductListView(generics.ListAPIView):
     """
     Lists products with manual filtering to ensure correct database queries.
@@ -128,6 +130,7 @@ class ProductDeleteView(generics.DestroyAPIView):
     def get_queryset(self):
         return self.queryset.filter(seller=self.request.user)
 
+@method_decorator(cache_page(60 * 2), name='dispatch') 
 class UserProductsView(generics.ListAPIView):
     serializer_class = ProductSerializer
     permission_classes = [IsAuthenticated]
@@ -142,6 +145,7 @@ class UserProductsView(generics.ListAPIView):
             is_liked=Exists(likes_subquery)
         ).order_by('-created_at')
 
+@method_decorator(cache_page(60 * 60), name='dispatch') 
 class CategoryListView(generics.ListAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = Category.objects.filter(is_active=True)

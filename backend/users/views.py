@@ -11,9 +11,10 @@ from .serializers import (
 )
 from products.models import Product
 from django.utils import timezone
+from django.utils.decorators import method_decorator
+from django_ratelimit.decorators import ratelimit
 
-
-
+@method_decorator(ratelimit(key='ip', rate='20/m', block=True), name='dispatch')
 class UserRegistrationView(generics.CreateAPIView):
     """User registration endpoint"""
     
@@ -34,7 +35,6 @@ class UserRegistrationView(generics.CreateAPIView):
             'access': str(refresh.access_token),
             'refresh': str(refresh),
         }, status=status.HTTP_201_CREATED)
-
 
 class UserLoginView(generics.GenericAPIView):
     """User login endpoint"""
