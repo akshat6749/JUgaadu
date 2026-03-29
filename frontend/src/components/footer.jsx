@@ -3,125 +3,102 @@ import { Facebook, Twitter, Instagram, Mail, Phone, MapPin } from "lucide-react"
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="space-y-4">
-            <h3 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              JUgaadu
+    <footer className="bg-black text-white border-t-[6px] border-[#CCFF00]">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-8 md:py-10">
+
+        {/* Top Grid: 3 equal columns for L/C/R alignment */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+          {/* Left: Brand */}
+          <div className="flex flex-col space-y-3 justify-start items-start md:items-start">
+            <h3 className="text-4xl md:text-5xl font-ranchers uppercase tracking-wide leading-none">
+              JUGAADU
             </h3>
-            <p className="text-gray-400 text-sm">
-              The trusted marketplace for college students to buy and sell used items safely within Jadavpur campus
-              community.
+            <div className="inline-block border-[2px] border-[#CCFF00] px-2 py-0.5 bg-white sticker-rotate-1">
+              <span className="font-mono text-black font-black text-[10px] tracking-widest uppercase">
+                #1 JADAVPUR HUB
+              </span>
+            </div>
+            <p className="font-mono font-medium text-gray-400 text-[10px] leading-snug max-w-[250px] uppercase">
+              THE TRUSTED MARKETPLACE TO BUY AND SELL ITEMS SAFELY WITHIN THE CAMPUS COMMUNITY.
             </p>
-            <div className="flex space-x-4">
-              <a
-                href="#"
-                className="text-gray-400 hover:text-blue-400 transform hover:scale-110 transition-all duration-200"
-              >
-                <Facebook className="h-5 w-5" />
+
+            <div className="flex space-x-3 pt-2">
+              <a href="#" className="w-8 h-8 bg-white flex items-center justify-center border-[2px] border-[#CCFF00] text-black hover:bg-[#CCFF00] hover:-translate-y-1 transition-all shadow-[2px_2px_0_0_#CCFF00]">
+                <Facebook className="h-4 w-4" />
               </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-blue-400 transform hover:scale-110 transition-all duration-200"
-              >
-                <Twitter className="h-5 w-5" />
+              <a href="#" className="w-8 h-8 bg-white flex items-center justify-center border-[2px] border-[#CCFF00] text-black hover:bg-[#CCFF00] hover:-translate-y-1 transition-all shadow-[2px_2px_0_0_#CCFF00]">
+                <Twitter className="h-4 w-4" />
               </a>
-              <a
-                href="#"
-                className="text-gray-400 hover:text-pink-400 transform hover:scale-110 transition-all duration-200"
-              >
-                <Instagram className="h-5 w-5" />
+              <a href="#" className="w-8 h-8 bg-white flex items-center justify-center border-[2px] border-[#CCFF00] text-black hover:bg-[#CCFF00] hover:-translate-y-1 transition-all shadow-[2px_2px_0_0_#CCFF00]">
+                <Instagram className="h-4 w-4" />
               </a>
             </div>
           </div>
 
-          {/* Quick Links */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold">Quick Links</h4>
-            <div className="space-y-2">
-              <Link href="/marketplace" className="block text-gray-400 hover:text-white transition-colors duration-200">
-                Marketplace
-              </Link>
-              <Link href="/categories" className="block text-gray-400 hover:text-white transition-colors duration-200">
-                Categories
-              </Link>
-              <Link
-                href="/how-it-works"
-                className="block text-gray-400 hover:text-white transition-colors duration-200"
-              >
-                How It Works
-              </Link>
-              <Link href="/safety" className="block text-gray-400 hover:text-white transition-colors duration-200">
-                Safety Tips
-              </Link>
+          {/* Center: Quick Links */}
+          <div className="flex flex-col space-y-4 md:items-center">
+            <div className="flex flex-col space-y-3 w-max">
+              <h4 className="font-mono text-sm font-black uppercase tracking-widest border-b-[3px] border-white inline-block pb-1">
+                CRITICAL LINKS
+              </h4>
+              <div className="space-y-2 font-mono font-bold text-[11px] uppercase flex flex-col items-start mt-2">
+                <Link href="/marketplace" className="text-[#CCFF00] hover:text-black hover:bg-[#CCFF00] px-2 py-0.5 transition-colors">
+                  [ MARKETPLACE ]
+                </Link>
+                <Link href="/categories" className="text-white hover:text-black hover:bg-white px-2 py-0.5 transition-colors">
+                  [ CATEGORIES ]
+                </Link>
+                <Link href="/how-it-works" className="text-white hover:text-black hover:bg-white px-2 py-0.5 transition-colors">
+                  [ HOW IT WORKS ]
+                </Link>
+                <Link href="/safety" className="text-white hover:text-black hover:bg-white px-2 py-0.5 transition-colors">
+                  [ SAFETY ]
+                </Link>
+              </div>
             </div>
           </div>
 
-          {/* Categories */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold">Categories</h4>
-            <div className="space-y-2">
-              <Link
-                href="/category/books"
-                className="block text-gray-400 hover:text-white transition-colors duration-200"
-              >
-                Textbooks
-              </Link>
-              <Link
-                href="/category/electronics"
-                className="block text-gray-400 hover:text-white transition-colors duration-200"
-              >
-                Electronics
-              </Link>
-              <Link
-                href="/category/notes"
-                className="block text-gray-400 hover:text-white transition-colors duration-200"
-              >
-                Study Notes
-              </Link>
-              <Link
-                href="/category/furniture"
-                className="block text-gray-400 hover:text-white transition-colors duration-200"
-              >
-                Furniture
-              </Link>
+          {/* Right: Contact */}
+          <div className="flex flex-col space-y-4 md:items-end text-left sm:text-right">
+            <div className="flex flex-col space-y-3 w-full max-w-[280px]">
+              <h4 className="font-mono text-sm font-black uppercase tracking-widest border-b-[3px] border-white inline-block pb-1 self-start md:self-end text-left md:text-right">
+                TERMINAL
+              </h4>
+              <div className="space-y-2 font-mono text-[10px] uppercase font-bold text-gray-300 w-full mt-2">
+                <div className="flex items-center space-x-3 bg-[#121212] p-2 border-[2px] border-gray-800">
+                  <Mail className="h-3 w-3 text-[#CCFF00] shrink-0" />
+                  <span className="truncate">ADMIN@JU.EDU</span>
+                </div>
+                <div className="flex items-center space-x-3 bg-[#121212] p-2 border-[2px] border-gray-800">
+                  <Phone className="h-3 w-3 text-[#CCFF00] shrink-0" />
+                  <span>+91 7439 587 602</span>
+                </div>
+                <div className="flex items-center space-x-3 bg-[#121212] p-2 border-[2px] border-gray-800">
+                  <MapPin className="h-3 w-3 text-[#CCFF00] shrink-0" />
+                  <span className="truncate">JADAVPUR UNIVERSITY</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Contact */}
-          <div className="space-y-4">
-            <h4 className="text-lg font-semibold">Contact Us</h4>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3 text-gray-400">
-                <Mail className="h-4 w-4" />
-                <span className="text-sm">akshatj.cse.ug@jadavpuruniversity.com</span>
-              </div>
-              <div className="flex items-center space-x-3 text-gray-400">
-                <Phone className="h-4 w-4" />
-                <span className="text-sm">+91 7439587602</span>
-              </div>
-              <div className="flex items-center space-x-3 text-gray-400">
-                <MapPin className="h-4 w-4" />
-                <span className="text-sm">Jadavpur Univerity</span>
-              </div>
-            </div>
+        </div>
+
+        {/* Footer Bottom Marquee / Legal */}
+        <div className="mt-8 pt-6 border-t-[3px] border-gray-900 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="font-ranchers text-2xl text-gray-800 tracking-wider">
+            JU V-2.0
+          </div>
+
+          <div className="font-mono text-[9px] font-bold uppercase text-gray-500 text-center md:text-right flex flex-wrap justify-center md:justify-end gap-3 items-center">
+            <span>© 2026 JU SECURE PROTOCOL</span>
+            <span className="hidden sm:inline text-gray-700">|</span>
+            <Link href="/privacy" className="hover:text-[#CCFF00] transition-colors">PRIVACY</Link>
+            <span className="hidden sm:inline text-gray-700">|</span>
+            <Link href="/terms" className="hover:text-[#CCFF00] transition-colors">TERMS</Link>
           </div>
         </div>
 
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center">
-          <p className="text-gray-400 text-sm">
-            © 2025 JUgaadu. All rights reserved. |
-            <Link href="/privacy" className="hover:text-white transition-colors duration-200 ml-1">
-              Privacy Policy
-            </Link>{" "}
-            |
-            <Link href="/terms" className="hover:text-white transition-colors duration-200 ml-1">
-              Terms of Service | Created By Akshat
-            </Link>
-          </p>
-        </div>
       </div>
     </footer>
   )
