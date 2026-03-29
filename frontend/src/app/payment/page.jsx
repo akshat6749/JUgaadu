@@ -4,9 +4,11 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 import { createPaymentOrder, verifyPayment } from "@/utils/api";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
+import Header from "@/components/header";
+import Footer from "@/components/footer";
 import { toast } from "@/hooks/use-toast";
+import { CreditCard, Zap, Shield, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 function PaymentPageContent() {
   const router = useRouter();
@@ -21,7 +23,7 @@ function PaymentPageContent() {
   const productImage = searchParams.get("image");
 
   // IMPORTANT: Replace with your Razorpay Key ID
-  const RAZORPAY_KEY_ID = "rzp_test_xxxxxxxxxxxxxx"; // Replace with your actual key
+  const RAZORPAY_KEY_ID = "rzp_test_xxxxxxxxxxxxxx";
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -32,8 +34,8 @@ function PaymentPageContent() {
   useEffect(() => {
     if (!productId || !amount || !productName) {
       toast({
-        title: "Error",
-        description: "Missing product information for payment.",
+        title: "SYNTAX ERROR",
+        description: "MISSING ASSET INFO FOR PAYMENT.",
         variant: "destructive",
       });
       router.push("/marketplace");
@@ -46,12 +48,8 @@ function PaymentPageContent() {
     return new Promise((resolve) => {
       const script = document.createElement("script");
       script.src = "https://checkout.razorpay.com/v1/checkout.js";
-      script.onload = () => {
-        resolve(true);
-      };
-      script.onerror = () => {
-        resolve(false);
-      };
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
       document.body.appendChild(script);
     });
   };
@@ -61,8 +59,8 @@ function PaymentPageContent() {
     const scriptLoaded = await loadRazorpayScript();
     if (!scriptLoaded) {
       toast({
-        title: "Error",
-        description: "Could not load payment gateway. Please check your connection.",
+        title: "COMM LINK FAILED",
+        description: "COULD NOT LOAD PAYMENT GATEWAY.",
         variant: "destructive",
       });
       setLoading(false);
@@ -70,9 +68,8 @@ function PaymentPageContent() {
     }
 
     try {
-      // Pass the productId to the createPaymentOrder function
       const orderResponse = await createPaymentOrder(productId, {
-        amount: parseFloat(amount) * 100, // Amount in paise
+        amount: parseFloat(amount) * 100,
         currency: "INR",
       });
 
@@ -82,8 +79,8 @@ function PaymentPageContent() {
         key: key || RAZORPAY_KEY_ID,
         amount: parseFloat(amount) * 100,
         currency: "INR",
-        name: "CampusCart",
-        description: `Payment for ${productName}`,
+        name: "JUGAADU",
+        description: `SECURE PAYMENT: ${productName}`,
         order_id: order_id,
         handler: async function (response) {
           try {
@@ -93,15 +90,14 @@ function PaymentPageContent() {
               razorpay_signature: response.razorpay_signature,
             });
             toast({
-              title: "Payment Successful!",
-              description: "Your order has been placed.",
+              title: "TRANSACTION SECURED",
+              description: "FUNDS TRANSFERRED SUCCESSFULLY.",
             });
             router.push(`/product/${productId}`);
           } catch (verifyError) {
-            console.error("Payment verification failed:", verifyError);
             toast({
-              title: "Payment Verification Failed",
-              description: "There was an issue confirming your payment. Please contact support.",
+              title: "VERIFICATION FAILED",
+              description: "CONTACT SYSTEM ADMIN.",
               variant: "destructive",
             });
           }
@@ -111,12 +107,12 @@ function PaymentPageContent() {
           email: user ? user.email : '',
         },
         theme: {
-          color: "#3399cc",
+          color: "#CCFF00",
         },
         modal: {
-            ondismiss: function() {
-                setLoading(false);
-            }
+          ondismiss: function () {
+            setLoading(false);
+          }
         }
       };
 
@@ -124,10 +120,9 @@ function PaymentPageContent() {
       paymentObject.open();
 
     } catch (error) {
-      console.error("Failed to create payment order:", error);
       toast({
-        title: "Payment Error",
-        description: "Could not initiate the payment process. Please try again.",
+        title: "PAYMENT INITIATION FAILED",
+        description: "PLEASE RETRY REQUEST.",
         variant: "destructive",
       });
       setLoading(false);
@@ -136,50 +131,90 @@ function PaymentPageContent() {
 
   if (authLoading || !user) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
+      <div className="min-h-screen bg-[#121212] font-jakarta selection:bg-[#CCFF00] selection:text-black">
+        <Header />
+        <div className="max-w-6xl mx-auto px-4 py-16 flex items-center justify-center min-h-[50vh]">
+          <div className="bg-[#CCFF00] border-[6px] border-black p-8 neo-shadow-black sticker-rotate-1 inline-flex items-center gap-4">
+            <div className="w-6 h-6 border-4 border-black border-t-transparent animate-spin rounded-full"></div>
+            <h2 className="font-ranchers text-4xl uppercase text-black">CHECKING CLEARANCE...</h2>
+          </div>
+        </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-4 md:p-8 flex justify-center items-center min-h-[80vh]">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Confirm Your Purchase</CardTitle>
-          <CardDescription>Review your item and proceed to payment.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center gap-4">
-            <img
-              src={productImage || 'https://placehold.co/100x100/eee/ccc?text=Item'}
-              alt={productName}
-              className="w-24 h-24 object-cover rounded-md"
-            />
-            <div>
-              <h3 className="font-semibold text-lg">{productName}</h3>
-              <p className="text-2xl font-bold">₹{amount}</p>
-            </div>
+    <div className="min-h-screen bg-[#121212] font-jakarta selection:bg-[#CCFF00] selection:text-black flex flex-col">
+      <Header />
+
+      <div className="flex-1 flex justify-center items-center p-4 md:p-8">
+        <div className="w-full max-w-lg">
+          <div className="mb-4">
+            <Link href={`/product/${productId}`} className="inline-block border-[3px] border-black bg-[#CCFF00] px-3 py-1 font-mono font-bold text-xs uppercase hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[4px_4px_0px_#000] transition-all">
+              ← BACK TO ASSET
+            </Link>
           </div>
-        </CardContent>
-        <CardFooter>
-          <Button className="w-full" onClick={handlePayment} disabled={loading}>
-            {loading ? 'Processing...' : `Proceed to Pay ₹${amount}`}
-          </Button>
-        </CardFooter>
-      </Card>
+
+          <div className="bg-white border-[6px] border-black neo-shadow-vault p-6 md:p-10">
+            {/* Header Area */}
+            <div className="border-b-[4px] border-black pb-4 mb-6 flex justify-between items-start">
+              <div>
+                <h1 className="font-ranchers text-4xl text-black uppercase leading-none mb-1">SECURE TRANSACTION</h1>
+                <p className="font-mono text-[10px] font-bold text-gray-500 uppercase flex items-center gap-2">
+                  <Shield className="h-3 w-3 shrink-0" /> ENCRYPTED PROTOCOL
+                </p>
+              </div>
+              <div className="bg-[#CCFF00] border-[3px] border-black p-2 sticker-rotate-2 shadow-[3px_3px_0_0_#000]">
+                <CreditCard className="h-6 w-6 text-black" />
+              </div>
+            </div>
+
+            {/* Product Info */}
+            <div className="flex gap-4 items-center bg-gray-50 border-[4px] border-black p-4 mb-6 relative">
+              <img
+                src={productImage || 'https://placehold.co/100x100/121212/CCFF00?text=ASSET'}
+                alt={productName}
+                className="w-20 h-20 object-cover border-[3px] border-black bg-black shrink-0"
+              />
+              <div className="min-w-0">
+                <h3 className="font-mono font-bold text-sm text-black uppercase truncate">{productName}</h3>
+                <p className="font-ranchers text-3xl text-black mt-1">₹{amount}</p>
+              </div>
+              <div className="absolute -top-3 -right-3 bg-black text-[#CCFF00] border-[3px] border-[#CCFF00] px-2 py-0.5 font-mono text-[10px] font-black uppercase text-center w-max shadow-[3px_3px_0_0_#000]">
+                READY
+              </div>
+            </div>
+
+            {/* Payment Button */}
+            <button
+              onClick={handlePayment}
+              disabled={loading}
+              className="w-full bg-[#CCFF00] text-black border-[4px] border-black py-4 font-mono font-extrabold uppercase text-lg neo-shadow-black hover:translate-x-1 hover:translate-y-1 hover:shadow-none hover:bg-black hover:text-[#CCFF00] transition-all flex justify-center items-center"
+            >
+              {loading ? (
+                <><Zap className="h-5 w-5 mr-2 animate-pulse" /> PROCESSING...</>
+              ) : (
+                `TRANSFER ₹${amount}`
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <Footer />
     </div>
   );
 }
 
 export default function PaymentPage() {
-    return (
-        <Suspense fallback={
-            <div className="flex justify-center items-center h-screen">
-                <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
-            </div>
-        }>
-            <PaymentPageContent />
-        </Suspense>
-    )
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#121212] flex justify-center items-center">
+        <div className="w-12 h-12 border-[6px] border-[#CCFF00] border-t-black animate-spin rounded-full"></div>
+      </div>
+    }>
+      <PaymentPageContent />
+    </Suspense>
+  )
 }

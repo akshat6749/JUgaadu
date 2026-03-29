@@ -3,23 +3,7 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Header from "@/components/header"
 import Footer from "@/components/footer"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Plus, MoreVertical, Edit, Trash2, Eye, MessageCircle, Heart, DollarSign, Loader2 } from "lucide-react"
+import { Zap, Plus, View, Star, MessageSquare, Trash2, Eye, CircleDollarSign } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useAuth } from "@/components/auth-provider"
 import { fetchUserListings, deleteProduct, markProductAsSold, fetchUserStats } from "@/utils/api"
@@ -45,7 +29,6 @@ export default function MyListingsPage() {
       router.push("/login")
       return
     }
-
     loadData()
   }, [isAuthenticated, router])
 
@@ -57,12 +40,7 @@ export default function MyListingsPage() {
       setListings(listingsData.results || listingsData)
       setStats(statsData)
     } catch (error) {
-      console.error("Failed to load data:", error)
-      toast({
-        title: "Error",
-        description: "Failed to load your listings. Please try again.",
-        variant: "destructive",
-      })
+      toast({ title: "SYNC ERROR", description: "DATA RETRIEVAL FAILED.", variant: "destructive" })
     } finally {
       setLoading(false)
     }
@@ -72,24 +50,14 @@ export default function MyListingsPage() {
     try {
       await deleteProduct(id)
       setListings((prev) => prev.filter((listing) => listing.id !== id))
-
-      // Update stats
       setStats((prev) => ({
         ...prev,
         total_listings: prev.total_listings - 1,
         active_listings: prev.active_listings - 1,
       }))
-
-      toast({
-        title: "Listing deleted",
-        description: "Your listing has been removed successfully.",
-      })
+      toast({ title: "ASSET PURGED", description: "LISTING DELETED." })
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete listing. Please try again.",
-        variant: "destructive",
-      })
+      toast({ title: "ERROR", description: "PURGE FAILED.", variant: "destructive" })
     }
   }
 
@@ -97,52 +65,38 @@ export default function MyListingsPage() {
     try {
       await markProductAsSold(id)
       setListings((prev) => prev.map((listing) => (listing.id === id ? { ...listing, is_sold: true } : listing)))
-
-      // Update stats
       setStats((prev) => ({
         ...prev,
         active_listings: prev.active_listings - 1,
         sold_listings: prev.sold_listings + 1,
       }))
-
-      toast({
-        title: "Marked as sold",
-        description: "Your listing has been marked as sold.",
-      })
+      toast({ title: "ASSET SECURED", description: "MARKED AS SOLD." })
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update listing. Please try again.",
-        variant: "destructive",
-      })
+      toast({ title: "ERROR", description: "STATE UPDATE FAILED.", variant: "destructive" })
     }
   }
 
   const getFilteredListings = (filter) => {
     switch (filter) {
-      case "active":
-        return listings.filter((listing) => !listing.is_sold)
-      case "sold":
-        return listings.filter((listing) => listing.is_sold)
-      default:
-        return listings
+      case "active": return listings.filter((listing) => !listing.is_sold)
+      case "sold": return listings.filter((listing) => listing.is_sold)
+      default: return listings
     }
   }
 
   const activeListings = getFilteredListings("active")
   const soldListings = getFilteredListings("sold")
 
-  if (!isAuthenticated) {
-    return null
-  }
+  if (!isAuthenticated) return null
 
   if (loading) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-[#121212] font-jakarta selection:bg-[#CCFF00] selection:text-black">
         <Header />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin" />
+        <div className="max-w-6xl mx-auto px-4 py-16 flex items-center justify-center min-h-[50vh]">
+          <div className="bg-[#CCFF00] border-[6px] border-black p-8 neo-shadow-black sticker-rotate-1 inline-flex items-center gap-4">
+            <div className="w-6 h-6 border-4 border-black border-t-transparent animate-spin rounded-full"></div>
+            <h2 className="font-ranchers text-4xl uppercase text-black">SYNCING DATA...</h2>
           </div>
         </div>
         <Footer />
@@ -151,80 +105,60 @@ export default function MyListingsPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#121212] font-jakarta selection:bg-[#CCFF00] selection:text-black pb-16">
       <Header />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex justify-between items-center mb-8">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Listings</h1>
-            <p className="text-gray-600">Manage your products and track their performance</p>
+            <div className="inline-flex bg-[#CCFF00] border-[3px] border-black px-2 py-1 font-mono font-bold uppercase text-[10px] mb-3 sticker-rotate-2 shadow-[3px_3px_0_0_#000]">
+              <Zap className="h-3 w-3 mr-1" /> COMMAND CENTER
+            </div>
+            <h1 className="font-ranchers text-6xl md:text-8xl text-white uppercase drop-shadow-[5px_5px_0_#CCFF00] leading-none">
+              MY ASSETS
+            </h1>
           </div>
-          <Button onClick={() => router.push("/sell")} className="bg-gradient-to-r from-green-600 to-emerald-600">
-            <Plus className="h-4 w-4 mr-2" />
-            Add New Listing
-          </Button>
+          <button onClick={() => router.push("/sell")} className="bg-white text-black border-[4px] border-black py-3 px-6 font-mono font-extrabold uppercase text-sm neo-shadow-vault hover:bg-[#CCFF00] hover:translate-y-1 hover:translate-x-1 hover:shadow-[3px_3px_0_0_#000] transition-all flex items-center">
+            <Plus className="h-5 w-5 mr-2" /> NEW DEPLOYMENT
+          </button>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Listings</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.total_listings}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active</CardTitle>
-              <Eye className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.active_listings}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Sold</CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.sold_listings}</div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Views</CardTitle>
-              <Eye className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.total_views}</div>
-            </CardContent>
-          </Card>
+        {/* Stats Section */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-12">
+          {[
+            { label: "TOTAL ENTRIES", value: stats.total_listings, color: "bg-white", text: "text-black" },
+            { label: "ACTIVE", value: stats.active_listings, color: "bg-[#CCFF00]", text: "text-black" },
+            { label: "SECURED (SOLD)", value: stats.sold_listings, color: "bg-black text-white border-white", text: "text-white" },
+            { label: "TOTAL VIEWS", value: stats.total_views, color: "bg-white", text: "text-black" }
+          ].map((stat, i) => (
+            <div key={i} className={`${stat.color} border-[4px] ${stat.color.includes('border-white') ? 'border-white' : 'border-black'} p-4 md:p-6 neo-shadow-black`}>
+              <p className={`font-mono text-[10px] font-bold uppercase mb-2 ${stat.text === 'text-white' ? 'text-gray-400' : 'text-gray-600'}`}>{stat.label}</p>
+              <p className={`font-ranchers text-4xl md:text-5xl ${stat.text}`}>{stat.value}</p>
+            </div>
+          ))}
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="all">All Listings ({listings.length})</TabsTrigger>
-            <TabsTrigger value="active">Active ({activeListings.length})</TabsTrigger>
-            <TabsTrigger value="sold">Sold ({soldListings.length})</TabsTrigger>
-          </TabsList>
+        {/* Tabs */}
+        <div className="flex flex-wrap gap-2 md:gap-4 mb-8">
+          {[
+            { id: "all", label: `ALL (${listings.length})` },
+            { id: "active", label: `ACTIVE (${activeListings.length})` },
+            { id: "sold", label: `SOLD (${soldListings.length})` }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-5 py-2 font-mono font-bold uppercase text-xs md:text-sm border-[4px] border-black transition-all ${activeTab === tab.id
+                  ? "bg-[#CCFF00] text-black shadow-[4px_4px_0_0_#000] translate-y-0"
+                  : "bg-white text-black hover:bg-gray-200"
+                }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
 
-          <TabsContent value="all" className="space-y-6">
-            <ListingGrid listings={listings} onDelete={handleDeleteListing} onMarkAsSold={handleMarkAsSold} />
-          </TabsContent>
-
-          <TabsContent value="active" className="space-y-6">
-            <ListingGrid listings={activeListings} onDelete={handleDeleteListing} onMarkAsSold={handleMarkAsSold} />
-          </TabsContent>
-
-          <TabsContent value="sold" className="space-y-6">
-            <ListingGrid listings={soldListings} onDelete={handleDeleteListing} onMarkAsSold={handleMarkAsSold} />
-          </TabsContent>
-        </Tabs>
+        <TabsContent currentTab={activeTab} listings={activeTab === "all" ? listings : activeTab === "active" ? activeListings : soldListings} onDelete={handleDeleteListing} onMarkAsSold={handleMarkAsSold} router={router} />
       </div>
 
       <Footer />
@@ -232,126 +166,85 @@ export default function MyListingsPage() {
   )
 }
 
-function ListingGrid({ listings, onDelete, onMarkAsSold }) {
-  const router = useRouter()
-
-  function getStatusBadge(listing) {
-    if (listing.is_sold) {
-      return <Badge className="bg-gray-100 text-gray-800">Sold</Badge>
-    }
-    return <Badge className="bg-green-100 text-green-800">Active</Badge>
-  }
-
+function TabsContent({ currentTab, listings, onDelete, onMarkAsSold, router }) {
   if (listings.length === 0) {
     return (
-      <Card className="text-center py-12">
-        <CardContent>
-          <div className="text-gray-500 mb-4">
-            <DollarSign className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p className="text-lg font-medium">No listings found</p>
-            <p className="text-sm">Start selling your items to see them here</p>
-          </div>
-          <Button onClick={() => router.push("/sell")} className="mt-4">
-            <Plus className="h-4 w-4 mr-2" />
-            Create Your First Listing
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="bg-white border-[6px] border-black p-12 text-center neo-shadow-vault max-w-2xl mt-8">
+        <Zap className="h-16 w-16 mx-auto mb-6 text-black" />
+        <h2 className="font-ranchers text-4xl uppercase text-black mb-2">NO ASSETS FOUND</h2>
+        <p className="font-mono text-xs font-bold uppercase text-gray-500 mb-8">INITIATE DEPLOYMENT TO POPULATE THIS SECTOR.</p>
+        <button onClick={() => router.push("/sell")} className="bg-[#CCFF00] text-black border-[4px] border-black py-3 px-8 font-mono font-bold uppercase text-sm neo-shadow-black hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all mx-auto min-w-[200px]">
+          DEPLOY NOW
+        </button>
+      </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {listings.map((listing) => (
-        <Card key={listing.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
-          <div className="relative">
+        <div key={listing.id} className="bg-white border-[6px] border-black neo-shadow-vault group flex flex-col relative overflow-hidden transition-all hover:-translate-y-2">
+
+          {/* Image container */}
+          <div className="h-48 border-b-[4px] border-black relative bg-black">
             <img
-              src={listing.images?.[0]?.image || "/placeholder.svg?height=200&width=300"}
+              src={listing.images?.[0]?.image || "https://placehold.co/400x300/121212/CCFF00?text=ASSET"}
               alt={listing.title}
-              className="w-full h-48 object-cover"
+              className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
             />
-            <div className="absolute top-2 left-2">{getStatusBadge(listing)}</div>
-            <div className="absolute top-2 right-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="bg-white/80 hover:bg-white">
-                    <MoreVertical className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => router.push(`/product/${listing.id}`)}>
-                    <Eye className="mr-2 h-4 w-4" />
-                    View Listing
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => router.push(`/sell/${listing.id}/edit`)}>
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit
-                  </DropdownMenuItem>
-                  {!listing.is_sold && (
-                    <DropdownMenuItem onClick={() => onMarkAsSold(listing.id)}>
-                      <DollarSign className="mr-2 h-4 w-4" />
-                      Mark as Sold
-                    </DropdownMenuItem>
-                  )}
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete
-                      </DropdownMenuItem>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete your listing.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => onDelete(listing.id)}>Delete</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <div className="absolute top-2 left-2 flex gap-2">
+              {listing.is_sold ? (
+                <div className="bg-red-600 border-[3px] border-black text-white font-mono text-[10px] font-black uppercase px-2 py-1 shadow-[3px_3px_0_0_#000]">
+                  SOLD OUT
+                </div>
+              ) : (
+                <div className="bg-[#CCFF00] border-[3px] border-black text-black font-mono text-[10px] font-black uppercase px-2 py-1 shadow-[3px_3px_0_0_#000]">
+                  ACTIVE
+                </div>
+              )}
             </div>
           </div>
 
-          <CardContent className="p-4">
-            <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{listing.title}</h3>
+          <div className="p-4 flex flex-col flex-1">
+            <h3 className="font-mono font-bold text-black uppercase text-sm line-clamp-2 mb-3 leading-tight min-h-[40px]">{listing.title}</h3>
 
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl font-bold text-green-600">${listing.price}</span>
-                {listing.original_price && listing.original_price > listing.price && (
-                  <span className="text-sm text-gray-500 line-through">${listing.original_price}</span>
-                )}
-              </div>
-              <Badge variant="outline" className="capitalize">
-                {listing.condition}
-              </Badge>
+            <div className="font-ranchers text-3xl text-black mb-4">
+              ₹{listing.price}
+              {listing.original_price && listing.original_price > listing.price && (
+                <span className="font-mono text-xs font-bold text-red-500 line-through ml-2 align-middle">
+                  ₹{listing.original_price}
+                </span>
+              )}
             </div>
 
-            <div className="flex items-center justify-between text-sm text-gray-500">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-1">
-                  <Eye className="h-4 w-4" />
-                  <span>{listing.views_count || 0}</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Heart className="h-4 w-4" />
-                  <span>{listing.likes_count || 0}</span>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <MessageCircle className="h-4 w-4" />
-                  <span>{listing.messages_count || 0}</span>
-                </div>
-              </div>
-              <span>{new Date(listing.created_at).toLocaleDateString()}</span>
+            {/* Stats Bar */}
+            <div className="flex gap-4 font-mono text-[10px] font-bold text-black border-t-[3px] border-black pt-3 pb-3">
+              <span className="flex items-center"><Eye className="h-3 w-3 mr-1" />{listing.views_count || 0}</span>
+              <span className="flex items-center"><Star className="h-3 w-3 mr-1" />{listing.likes_count || 0}</span>
+              <span className="flex items-center"><MessageSquare className="h-3 w-3 mr-1" />{listing.messages_count || 0}</span>
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Action Buttons Row */}
+            <div className="grid grid-cols-2 gap-2 mt-auto border-t-[4px] border-black pt-4">
+              <button onClick={() => router.push(`/product/${listing.id}`)} className="bg-white text-black border-[3px] border-black py-2 text-[10px] font-mono font-bold uppercase hover:bg-[#CCFF00] hover:shadow-[3px_3px_0_0_#000] hover:-translate-y-1 transition-all flex items-center justify-center delay-75">
+                <View className="h-3 w-3 mr-1" /> VIEW
+              </button>
+              <button onClick={() => {
+                if (confirm("DELETE THIS ASSET?")) onDelete(listing.id)
+              }} className="bg-white text-red-600 border-[3px] border-black py-2 text-[10px] font-mono font-bold uppercase hover:bg-black hover:text-red-500 hover:shadow-[3px_3px_0_0_#000] hover:-translate-y-1 transition-all flex items-center justify-center delay-75">
+                <Trash2 className="h-3 w-3 mr-1" /> PURGE
+              </button>
+
+              {!listing.is_sold && (
+                <button onClick={() => {
+                  if (confirm("MARK AS SOLD?")) onMarkAsSold(listing.id)
+                }} className="col-span-2 bg-[#CCFF00] text-black border-[3px] border-black py-2 text-[10px] font-mono font-bold uppercase hover:bg-black hover:text-[#CCFF00] hover:shadow-[3px_3px_0_0_#000] hover:-translate-y-1 transition-all flex items-center justify-center mt-1 font-black">
+                  <CircleDollarSign className="h-4 w-4 mr-1" /> MARK AS SECURED
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       ))}
     </div>
   )

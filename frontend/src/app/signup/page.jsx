@@ -2,24 +2,12 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Loader2, Eye, EyeOff, GraduationCap, BookOpen, Users, ShoppingBag, Sparkles } from "lucide-react"
+import { Eye, EyeOff, GraduationCap, Phone, User, Lock, Loader2, Zap } from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
 import { useToast } from "@/hooks/use-toast"
 
 export default function SignupPage() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    college: "Jadavpur University", // Default college value
-    phone: "",
-  })
+  const [formData, setFormData] = useState({ name: "", email: "", password: "", confirmPassword: "", phone: "" })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [error, setError] = useState("")
@@ -31,318 +19,141 @@ export default function SignupPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-    // Clear error when user starts typing
+    setFormData((prev) => ({ ...prev, [name]: value }))
     if (error) setError("")
   }
 
   const validateForm = () => {
-    if (!formData.name.trim()) {
-      setError("Name is required")
-      return false
-    }
-    if (!formData.email.trim()) {
-      setError("Email is required")
-      return false
-    }
-    
-    // Validate Jadavpur University email
-    const emailRegex = /^[^\s@]+@jadavpuruniversity\.in$/i
-    if (!emailRegex.test(formData.email)) {
-      setError("Please use your official Jadavpur University email (@jadavpuruniversity.in)")
-      return false
-    }
-    
-    if (!formData.password) {
-      setError("Password is required")
-      return false
-    }
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long")
-      return false
-    }
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match")
-      return false
-    }
+    if (!formData.name.trim()) return setError("NAME REQUIRED") || false
+    if (!formData.email.trim()) return setError("EMAIL REQUIRED") || false
+    if (!/^[^\s@]+@jadavpuruniversity\.in$/i.test(formData.email)) return setError("ONLY @JADAVPURUNIVERSITY.IN ACCEPTED.") || false
+    if (!formData.password) return setError("PASSWORD REQUIRED") || false
+    if (formData.password.length < 6) return setError("PASSWORD 6+ CHARS") || false
+    if (formData.password !== formData.confirmPassword) return setError("PASSWORDS MISMATCH") || false
     return true
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError("")
-
-    if (!validateForm()) {
-      return
-    }
-
+    if (!validateForm()) return
     setIsLoading(true)
-
     try {
-      console.log("🔍 Signup form submission:", formData)
-
       await register(formData)
-
-      console.log("✅ Registration successful, redirecting...")
-      toast({
-        title: "Account created successfully!",
-        description: "Welcome to the Jadavpur University marketplace.",
-      })
-
-      // Small delay to show the success message
-      setTimeout(() => {
-        router.push("/marketplace")
-      }, 1000)
+      toast({ title: "ACCOUNT CREATED", description: "WELCOME TO JUGAADU DIRECTIVE." })
+      setTimeout(() => { router.push("/marketplace") }, 1000)
     } catch (err) {
-      console.error("❌ Signup form error:", err)
-      setError(err.message || "Registration failed. Please try again.")
+      setError(err.message || "REGISTRATION FAILED.")
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-blue-50 to-indigo-100">
-      <div className="grid lg:grid-cols-2 min-h-screen">
-        {/* Left Side - Form */}
-        <div className="flex items-center justify-center px-4 py-8 lg:px-8">
-          <div className="w-full max-w-md">
-            <Card className="border-violet-200 shadow-xl animate-in slide-in-from-left-5 duration-700">
-              <CardHeader className="space-y-3 text-center">
-                <div className="flex justify-center">
-                  <div className="p-3 bg-gradient-to-br from-violet-100 to-blue-100 rounded-full animate-pulse">
-                    <GraduationCap className="h-8 w-8 text-violet-600" />
+    <div className="h-screen flex bg-[#121212] selection:bg-[#CCFF00] selection:text-black font-jakarta overflow-hidden">
+      {/* LEFT: FORM SECTION */}
+      <div className="w-full lg:w-1/2 h-full overflow-y-auto p-6 relative bg-white border-r-[8px] border-black flex flex-col items-center">
+
+        <div className="w-full max-w-sm m-auto relative z-10 py-8 shrink-0">
+          <div className="mb-4 text-left mt-4 lg:mt-0">
+            <Link href="/" className="inline-block border-[2px] border-black bg-[#CCFF00] px-3 py-1 font-mono font-bold text-[10px] uppercase hover:shadow-[3px_3px_0px_#000] -translate-y-0.5 transition-all mb-2">
+              ← BASE
+            </Link>
+            <h1 className="font-ranchers text-5xl text-black uppercase leading-none tracking-wide">
+              SIGN UP
+            </h1>
+            <p className="font-mono text-gray-500 font-bold uppercase text-[10px] tracking-widest mt-2 border-l-[4px] border-[#CCFF00] pl-3">
+              ESTABLISH IDENTITY STATUS
+            </p>
+          </div>
+
+          <div className="bg-white border-[4px] border-black neo-shadow-black p-5 relative mt-6">
+            <div className="absolute top-0 right-0 transform translate-x-4 -translate-y-4 bg-black text-[#CCFF00] border-[2px] border-[#CCFF00] p-2 text-center sticker-rotate-2 shadow-[4px_4px_0_0_#000] z-20">
+              <p className="font-mono text-[8px] font-black tracking-widest leading-[1.2] uppercase">
+                REQUIREMENT: <br /><span className="text-white underline decoration-[#CCFF00]">@JADAVPURUNIVERSITY.IN</span>
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4 relative mt-6">
+              {error && (
+                <div className="bg-red-500 border-[3px] border-black py-2 px-3 text-white font-mono font-bold uppercase text-[10px] flex items-center gap-2 sticker-rotate-1">
+                  <Zap className="h-4 w-4 shrink-0" /> <span>{error}</span>
+                </div>
+              )}
+
+              {/* Name field */}
+              <div className="space-y-1">
+                <label className="font-mono text-[10px] font-bold text-black uppercase">FULL NAME</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><User className="h-4 w-4 text-black" /></div>
+                  <input name="name" type="text" placeholder="ENTER DESIGNATION" value={formData.name} onChange={handleChange} required disabled={isLoading} className="w-full pl-9 pr-2 py-2.5 bg-white border-[3px] border-black text-black placeholder:text-gray-500 text-xs font-mono font-bold focus:bg-[#CCFF00] shadow-[3px_3px_0_0_#e5e7eb] focus:shadow-[3px_3px_0_0_#000] focus:-translate-y-1 uppercase transition-all" />
+                </div>
+              </div>
+
+              {/* Email & Phone Row */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="font-mono text-[10px] font-bold text-black uppercase">COLLEGE EMAIL</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><GraduationCap className="h-4 w-4 text-black" /></div>
+                    <input name="email" type="email" placeholder="ID@JU.IN" value={formData.email} onChange={handleChange} required disabled={isLoading} className="w-full pl-9 pr-2 py-2.5 bg-white border-[3px] border-black text-black placeholder:text-gray-500 text-xs font-mono font-bold focus:bg-[#CCFF00] shadow-[3px_3px_0_0_#e5e7eb] focus:shadow-[3px_3px_0_0_#000] focus:-translate-y-1 uppercase transition-all" />
                   </div>
                 </div>
-                <CardTitle className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent animate-in fade-in-50 duration-1000 delay-200">
-                  Join JU Marketplace
-                </CardTitle>
-                <CardDescription className="text-violet-600 animate-in fade-in-50 duration-1000 delay-300">
-                  Create your account to access the Jadavpur University student marketplace
-                </CardDescription>
-                <div className="bg-gradient-to-r from-violet-50 to-blue-50 p-3 rounded-lg border border-violet-200 animate-in slide-in-from-bottom-3 duration-1000 delay-400">
-                  <p className="text-sm text-violet-700 font-medium">
-                    📧 Only official Jadavpur University student emails (@jadavpuruniversity.in) are accepted
-                  </p>
+                <div className="space-y-1">
+                  <label className="font-mono text-[10px] font-bold text-black uppercase">COMM LINK</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Phone className="h-4 w-4 text-black" /></div>
+                    <input name="phone" type="tel" placeholder="PHONE NO." value={formData.phone} onChange={handleChange} disabled={isLoading} className="w-full pl-9 pr-2 py-2.5 bg-white border-[3px] border-black text-black placeholder:text-gray-500 text-xs font-mono font-bold focus:bg-[#CCFF00] shadow-[3px_3px_0_0_#e5e7eb] focus:shadow-[3px_3px_0_0_#000] focus:-translate-y-1 uppercase transition-all" />
+                  </div>
                 </div>
-              </CardHeader>
-              <CardContent className="animate-in fade-in-50 duration-1000 delay-500">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {error && (
-                    <Alert variant="destructive" className="border-red-200 bg-red-50 animate-in slide-in-from-top-2 duration-300">
-                      <AlertDescription className="text-red-700">{error}</AlertDescription>
-                    </Alert>
-                  )}
+              </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="text-violet-700 font-medium">Full Name</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      type="text"
-                      placeholder="Enter your full name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      required
-                      disabled={isLoading}
-                      className="border-violet-200 focus:border-violet-400 focus:ring-violet-400 transition-all duration-200 hover:border-violet-300"
-                    />
+              {/* Passwords Row */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="font-mono text-[10px] font-bold text-black uppercase">CIPHER</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Lock className="h-4 w-4 text-black" /></div>
+                    <input name="password" type={showPassword ? "text" : "password"} placeholder="INPUT" value={formData.password} onChange={handleChange} required disabled={isLoading} className="w-full pl-9 pr-8 py-2.5 bg-white border-[3px] border-black text-black placeholder:text-gray-500 text-xs font-mono font-bold focus:bg-[#CCFF00] shadow-[3px_3px_0_0_#e5e7eb] focus:shadow-[3px_3px_0_0_#000] focus:-translate-y-1 uppercase transition-all" />
+                    <button type="button" className="absolute right-0 top-0 h-full px-2 hover:bg-black hover:text-[#CCFF00] border-l-[3px] border-transparent hover:border-black transition-colors" onClick={() => setShowPassword(!showPassword)}>
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                   </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-violet-700 font-medium">University Email</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="your.name@jadavpuruniversity.in"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      disabled={isLoading}
-                      className="border-violet-200 focus:border-violet-400 focus:ring-violet-400 transition-all duration-200 hover:border-violet-300"
-                    />
-                    <p className="text-xs text-violet-600">
-                      Use your official JU student email address
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-violet-700 font-medium">Phone Number</Label>
-                    <Input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      placeholder="Enter your phone number"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      disabled={isLoading}
-                      className="border-violet-200 focus:border-violet-400 focus:ring-violet-400 transition-all duration-200 hover:border-violet-300"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="password" className="text-violet-700 font-medium">Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Create a password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        required
-                        disabled={isLoading}
-                        className="border-violet-200 focus:border-violet-400 focus:ring-violet-400 pr-10 transition-all duration-200 hover:border-violet-300"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-violet-50 text-violet-600 transition-colors duration-200"
-                        onClick={() => setShowPassword(!showPassword)}
-                        disabled={isLoading}
-                      >
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword" className="text-violet-700 font-medium">Confirm Password</Label>
-                    <div className="relative">
-                      <Input
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        type={showConfirmPassword ? "text" : "password"}
-                        placeholder="Confirm your password"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        required
-                        disabled={isLoading}
-                        className="border-violet-200 focus:border-violet-400 focus:ring-violet-400 pr-10 transition-all duration-200 hover:border-violet-300"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-violet-50 text-violet-600 transition-colors duration-200"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        disabled={isLoading}
-                      >
-                        {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white font-medium py-2.5 transition-all duration-300 hover:shadow-lg transform hover:scale-[1.02]" 
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating account...
-                      </>
-                    ) : (
-                      "Create Account"
-                    )}
-                  </Button>
-                </form>
-
-                <div className="mt-6 text-center text-sm">
-                  <span className="text-violet-600">Already have an account? </span>
-                  <Link href="/login" className="text-blue-600 hover:text-blue-700 font-medium underline decoration-blue-300 hover:decoration-blue-500 transition-colors duration-200">
-                    Sign in
-                  </Link>
                 </div>
-              </CardContent>
-            </Card>
+                <div className="space-y-1">
+                  <label className="font-mono text-[10px] font-bold text-black uppercase">VERIFY</label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Lock className="h-4 w-4 text-black" /></div>
+                    <input name="confirmPassword" type={showConfirmPassword ? "text" : "password"} placeholder="RE-TYPE" value={formData.confirmPassword} onChange={handleChange} required disabled={isLoading} className="w-full pl-9 pr-8 py-2.5 bg-white border-[3px] border-black text-black placeholder:text-gray-500 text-xs font-mono font-bold focus:bg-[#CCFF00] shadow-[3px_3px_0_0_#e5e7eb] focus:shadow-[3px_3px_0_0_#000] focus:-translate-y-1 uppercase transition-all" />
+                    <button type="button" className="absolute right-0 top-0 h-full px-2 hover:bg-black hover:text-[#CCFF00] border-l-[3px] border-transparent hover:border-black transition-colors" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <button type="submit" disabled={isLoading} className="w-full bg-[#CCFF00] text-black border-[4px] border-black py-3 mt-4 font-mono font-extrabold uppercase text-[12px] shadow-[4px_4px_0_0_#000] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none hover:bg-black hover:text-[#CCFF00] flex justify-center items-center transition-all">
+                {isLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> WRITING...</> : "ESTABLISH ACCOUNT"}
+              </button>
+            </form>
+
+            <div className="mt-5 pt-4 border-t-[3px] border-black text-center">
+              <span className="font-mono font-bold text-[10px] text-black uppercase">ALREADY LISTED? </span>
+              <Link href="/login" className="font-mono font-bold text-[10px] text-white bg-black px-2 py-1 hover:bg-[#CCFF00] hover:text-black border-[2px] border-transparent hover:border-black transition-colors ml-1 uppercase">PROCEED TO LOGIN</Link>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Right Side - JUgaadu Branding */}
-        <div className="hidden lg:flex items-center justify-center bg-gradient-to-br from-violet-600 via-blue-600 to-indigo-700 relative overflow-hidden">
-          {/* Animated Background Elements */}
-          <div className="absolute inset-0">
-            <div className="absolute top-10 left-10 w-20 h-20 bg-white/10 rounded-full animate-bounce [animation-delay:0s]"></div>
-            <div className="absolute top-32 right-20 w-16 h-16 bg-white/10 rounded-full animate-bounce [animation-delay:2s]"></div>
-            <div className="absolute bottom-20 left-20 w-12 h-12 bg-white/10 rounded-full animate-bounce [animation-delay:4s]"></div>
-            <div className="absolute bottom-32 right-10 w-24 h-24 bg-white/10 rounded-full animate-bounce [animation-delay:1s]"></div>
-            
-            {/* Floating gradient orbs */}
-            <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-full blur-xl animate-pulse [animation-delay:0.5s]"></div>
-            <div className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-full blur-xl animate-pulse [animation-delay:1.5s]"></div>
+      {/* RIGHT: BRANDING */}
+      <div className="hidden lg:flex w-1/2 bg-[#121212] flex-col justify-center items-center relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.2]" style={{ backgroundImage: "linear-gradient(#CCFF00 2px, transparent 2px), linear-gradient(90deg, #CCFF00 2px, transparent 2px)", backgroundSize: "40px 40px" }} />
+        <div className="relative z-10 text-center flex flex-col items-center">
+          <div className="w-24 h-24 bg-[#CCFF00] border-[4px] border-black flex items-center justify-center neo-shadow-vault sticker-rotate-2 mb-8 hover:-rotate-12 transition-transform shadow-[4px_4px_0_0_#FFF]">
+            <GraduationCap className="h-12 w-12 text-black" />
           </div>
-
-          <div className="relative z-10 text-center text-white px-8 animate-in slide-in-from-right-5 duration-700">
-            {/* Main Logo/Title */}
-            <div className="mb-8">
-              <h1 className="text-6xl font-bold mb-4 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent animate-in zoom-in-50 duration-1000 delay-200">
-                JU<span className="text-yellow-300">gaadu</span>
-              </h1>
-              <div className="flex items-center justify-center gap-2 mb-6 animate-in fade-in-50 duration-1000 delay-400">
-                <Sparkles className="h-6 w-6 text-yellow-300 animate-spin [animation-duration:3s]" />
-                <p className="text-xl text-blue-100">
-                  Your Campus Marketplace
-                </p>
-                <Sparkles className="h-6 w-6 text-yellow-300 animate-spin [animation-duration:3s] [animation-delay:1.5s]" />
-              </div>
-            </div>
-
-            {/* Features Grid */}
-            <div className="grid grid-cols-1 gap-6 max-w-md mx-auto animate-in fade-in-50 duration-1000 delay-600">
-              <div className="flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-lg p-4 transform hover:scale-105 transition-all duration-300 hover:bg-white/20">
-                <div className="p-2 bg-white/20 rounded-full">
-                  <BookOpen className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-left">
-                  <h3 className="font-semibold text-white">Study Materials</h3>
-                  <p className="text-sm text-blue-100">Buy & sell books, notes</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-lg p-4 transform hover:scale-105 transition-all duration-300 hover:bg-white/20 [animation-delay:0.2s]">
-                <div className="p-2 bg-white/20 rounded-full">
-                  <Users className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-left">
-                  <h3 className="font-semibold text-white">Student Community</h3>
-                  <p className="text-sm text-blue-100">Connect with JU students</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-lg p-4 transform hover:scale-105 transition-all duration-300 hover:bg-white/20 [animation-delay:0.4s]">
-                <div className="p-2 bg-white/20 rounded-full">
-                  <ShoppingBag className="h-6 w-6 text-white" />
-                </div>
-                <div className="text-left">
-                  <h3 className="font-semibold text-white">Marketplace</h3>
-                  <p className="text-sm text-blue-100">Everything you need</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom tagline */}
-            <div className="mt-12 animate-in slide-in-from-bottom-3 duration-1000 delay-800">
-              <p className="text-lg text-blue-100 mb-2">
-                "Jugaad" meets Technology
-              </p>
-              <p className="text-sm text-blue-200 max-w-sm mx-auto">
-                The smartest way for Jadavpur University students to buy, sell, and connect with each other.
-              </p>
-            </div>
-
-            {/* Animated university badge */}
-            <div className="mt-8 inline-flex items-center gap-2 bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 animate-pulse">
-              <GraduationCap className="h-5 w-5 text-yellow-300" />
-              <span className="text-sm font-medium text-white">Jadavpur University</span>
-            </div>
-          </div>
+          <h2 className="font-ranchers text-[90px] leading-[0.8] text-white uppercase drop-shadow-[5px_5px_0_#CCFF00] mb-4">THE<br />NETWORK<br /><span className="text-[#CCFF00] drop-shadow-[5px_5px_0_#FFF]">AWAITS</span></h2>
+          <div className="bg-white text-black font-mono font-bold text-xs px-4 py-2 border-[4px] border-[#CCFF00] shadow-[5px_5px_0_0_#000]">EXCLUSIVE. NO OUTSIDERS.</div>
         </div>
       </div>
     </div>

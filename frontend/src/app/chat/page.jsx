@@ -5,11 +5,9 @@ import { useAuth } from '@/components/auth-provider';
 import { getMyChats, getChatMessages, createMessage } from '@/utils/api';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Pusher from 'pusher-js';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Send, MessageCircle, User } from 'lucide-react';
+import { Send, MessageSquare, Zap, ArrowRight, Activity, Terminal } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import Header from '@/components/header';
 import Link from 'next/link';
 
 function ChatPageContent() {
@@ -23,12 +21,13 @@ function ChatPageContent() {
     const [newMessage, setNewMessage] = useState('');
     const [loadingChats, setLoadingChats] = useState(true);
     const [loadingMessages, setLoadingMessages] = useState(false);
-    
+
     const messagesEndRef = useRef(null);
     const pusherRef = useRef(null);
     const channelRef = useRef(null);
     const tempMessageId = useRef(null);
 
+    // [Rest of logic remains identical - only UI rewrites]
     useEffect(() => {
         if (!authLoading && !user) {
             router.push('/login');
@@ -40,7 +39,7 @@ function ChatPageContent() {
                 try {
                     setLoadingChats(true);
                     const response = await getMyChats();
-                    
+
                     const fetchedChats = Array.isArray(response.data) ? response.data : response.data.results;
 
                     if (Array.isArray(fetchedChats)) {
@@ -55,12 +54,10 @@ function ChatPageContent() {
                         }
                     } else {
                         setChats([]);
-                        console.error("Fetched chats is not an array:", response.data);
-                        toast({ title: "Error", description: "Could not load your chats due to an unexpected format.", variant: "destructive" });
+                        toast({ title: "SYS ERROR", description: "DATA MALFORMED.", variant: "destructive" });
                     }
                 } catch (error) {
-                    console.error("Failed to fetch chats", error);
-                    toast({ title: "Error", description: "Could not load your chats.", variant: "destructive" });
+                    toast({ title: "SYNC ERROR", description: "COULD NOT LOAD COMMS.", variant: "destructive" });
                 } finally {
                     setLoadingChats(false);
                 }
@@ -68,7 +65,7 @@ function ChatPageContent() {
             fetchChatsAndSelect();
         }
     }, [user, authLoading, router, searchParams]);
-    
+
     useEffect(() => {
         if (!user || !selectedChat) return;
 
@@ -87,7 +84,7 @@ function ChatPageContent() {
                 }
             });
         }
-        
+
         const channelName = `private-conversation-${selectedChat.id}`;
         channelRef.current = pusherRef.current.subscribe(channelName);
 
@@ -95,7 +92,7 @@ function ChatPageContent() {
             if (data.sender.id === user.id) {
                 setMessages(prev => prev.map(msg => msg.id === tempMessageId.current ? data : msg));
             } else {
-                 if (!messages.some(msg => msg.id === data.id)) {
+                if (!messages.some(msg => msg.id === data.id)) {
                     setMessages(prevMessages => [...prevMessages, data]);
                 }
             }
@@ -117,7 +114,7 @@ function ChatPageContent() {
         try {
             setLoadingMessages(true);
             const response = await getChatMessages(chat.id);
-            
+
             let fetchedMessages = [];
             if (response && response.data) {
                 if (Array.isArray(response.data)) {
@@ -125,15 +122,13 @@ function ChatPageContent() {
                 } else if (response.data.results && Array.isArray(response.data.results)) {
                     fetchedMessages = response.data.results;
                 } else {
-                    console.error("Fetched messages is not in a recognized format:", response.data);
-                    toast({ title: "Error", description: "Could not load messages due to an unexpected format.", variant: "destructive" });
+                    toast({ title: "SYS ERROR", description: "DATA MALFORMED.", variant: "destructive" });
                 }
             }
             setMessages(fetchedMessages);
 
         } catch (error) {
-            console.error(`Failed to fetch messages for chat ${chat.id}`, error);
-            toast({ title: "Error", description: "Could not load messages.", variant: "destructive" });
+            toast({ title: "SYNC ERROR", description: "COULD NOT LOAD COMM HISTORY.", variant: "destructive" });
             setMessages([]);
         } finally {
             setLoadingMessages(false);
@@ -145,12 +140,12 @@ function ChatPageContent() {
         if (!newMessage.trim() || !selectedChat) return;
 
         tempMessageId.current = `temp-${Date.now()}-${Math.random()}`;
-        
+
         const messageData = {
             conversation: selectedChat.id,
             content: newMessage,
         };
-        
+
         const optimisticMessage = {
             id: tempMessageId.current,
             content: newMessage,
@@ -163,22 +158,24 @@ function ChatPageContent() {
         try {
             await createMessage(messageData);
         } catch (error) {
-            console.error("Failed to send message", error);
-            toast({ title: "Error", description: "Could not send message.", variant: "destructive" });
+            toast({ title: "TX ERROR", description: "PACKET DROPPED.", variant: "destructive" });
             setMessages(prev => prev.filter(m => m.id !== tempMessageId.current));
         }
     };
-    
+
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
 
     if (authLoading || loadingChats) {
         return (
-            <div className="flex justify-center items-center h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
-                <div className="flex flex-col items-center space-y-4">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-                    <p className="text-slate-600 font-medium">Loading your conversations...</p>
+            <div className="flex h-screen bg-[#121212] font-jakarta selection:bg-[#CCFF00] selection:text-black">
+                <Header />
+                <div className="flex-1 flex justify-center items-center mt-20">
+                    <div className="bg-[#CCFF00] border-[6px] border-black p-8 neo-shadow-vault text-black flex items-center gap-4 sticker-rotate-1">
+                        <Terminal className="h-8 w-8 animate-pulse" />
+                        <h2 className="font-ranchers text-4xl uppercase">ESTABLISHING CONNECTION...</h2>
+                    </div>
                 </div>
             </div>
         );
@@ -189,198 +186,182 @@ function ChatPageContent() {
     };
 
     return (
-        <div className="flex h-screen bg-white">
-            {/* Sidebar */}
-            <aside className="w-full md:w-1/3 bg-gradient-to-b from-slate-50 to-slate-100 border-r border-slate-200 flex flex-col">
-                <div className="p-6 bg-white/80 backdrop-blur-sm border-b border-slate-200/60">
-                    <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-blue-100 rounded-xl">
-                            <MessageCircle className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-bold text-slate-800">Messages</h2>
-                            <p className="text-sm text-slate-500">{chats.length} conversation{chats.length !== 1 ? 's' : ''}</p>
+        <div className="flex flex-col h-screen bg-[#121212] font-jakarta selection:bg-[#CCFF00] selection:text-black overflow-hidden relative z-50">
+            <Header absolute={false} />
+
+            <div className="flex flex-1 overflow-hidden lg:pl-[120px] max-w-full">
+
+                {/* SIDEBAR: CHAT CHANNELS */}
+                <aside className={`w-full md:w-[350px] lg:w-[400px] border-r-[4px] border-black bg-white flex flex-col shrink-0 ${selectedChat ? 'hidden md:flex' : 'flex'}`}>
+
+                    <div className="p-4 border-b-[4px] border-black bg-[#CCFF00]">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-black text-[#CCFF00] p-2 border-[2px] border-black shadow-[3px_3px_0_0_#FFF]">
+                                <Activity className="h-5 w-5" />
+                            </div>
+                            <div>
+                                <h2 className="font-ranchers text-3xl text-black uppercase leading-none">COMMS</h2>
+                                <p className="font-mono text-[10px] font-bold text-black uppercase">{chats.length} ACTIVE CHANNELS</p>
+                            </div>
                         </div>
                     </div>
-                </div>
-                
-                <div className="flex-1 overflow-y-auto">
-                    {chats.length > 0 ? (
-                        <div className="p-3 space-y-1">
-                            {chats.map(chat => {
+
+                    <div className="flex-1 overflow-y-auto bg-gray-50 hide-scrollbar p-2 space-y-2">
+                        {chats.length > 0 ? (
+                            chats.map(chat => {
                                 const otherUser = getOtherParticipant(chat);
                                 const isSelected = selectedChat?.id === chat.id;
                                 return (
-                                    <div 
-                                        key={chat.id} 
-                                        onClick={() => handleSelectChat(chat)} 
-                                        className={`p-4 cursor-pointer rounded-xl transition-all duration-200 hover:scale-[1.02] hover:shadow-md ${
-                                            isSelected 
-                                                ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg' 
-                                                : 'bg-white/60 backdrop-blur-sm hover:bg-white/80 border border-slate-200/50'
-                                        }`}
+                                    <div
+                                        key={chat.id}
+                                        onClick={() => handleSelectChat(chat)}
+                                        className={`p-3 border-[3px] border-black cursor-pointer transition-all ${isSelected
+                                                ? 'bg-black text-white shadow-[4px_4px_0_0_#CCFF00] translate-x-1'
+                                                : 'bg-white text-black hover:bg-[#CCFF00] hover:shadow-[3px_3px_0_0_#000]'
+                                            }`}
                                     >
-                                        <div className="flex items-center space-x-4">
-                                            <div className="relative">
-                                                <Avatar className="h-12 w-12 ring-2 ring-white/20">
-                                                    <AvatarImage src={otherUser?.avatar} />
-                                                    <AvatarFallback className={`text-sm font-semibold ${isSelected ? 'bg-white/20 text-white' : 'bg-gradient-to-br from-slate-200 to-slate-300 text-slate-700'}`}>
-                                                        {otherUser?.first_name?.[0] || <User className="h-4 w-4" />}
-                                                    </AvatarFallback>
-                                                </Avatar>
-                                                <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-400 border-2 border-white rounded-full"></div>
+                                        <div className="flex items-center gap-3">
+                                            <div className={`relative shrink-0 w-12 h-12 border-[3px] border-black bg-gray-200 overflow-hidden ${isSelected ? 'border-[#CCFF00]' : ''}`}>
+                                                {otherUser?.avatar ? (
+                                                    <img src={otherUser.avatar} alt="avatar" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center font-ranchers text-xl text-black">
+                                                        {otherUser?.first_name?.[0]}
+                                                    </div>
+                                                )}
+                                                <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#CCFF00] border-l-[2px] border-t-[2px] border-black z-10" />
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className={`font-semibold truncate ${isSelected ? 'text-white' : 'text-slate-800'}`}>
+                                                <p className="font-mono font-bold uppercase text-xs truncate">
                                                     {otherUser?.first_name} {otherUser?.last_name}
                                                 </p>
-                                                <p className={`text-sm truncate mt-1 ${isSelected ? 'text-indigo-100' : 'text-slate-500'}`}>
-                                                    {chat.last_message?.content || 'No messages yet'}
+                                                <p className={`font-mono text-[10px] uppercase truncate ${isSelected ? 'text-gray-300' : 'text-gray-500'}`}>
+                                                    {chat.last_message?.content || 'AWAITING TRANSMISSION'}
                                                 </p>
                                             </div>
                                         </div>
                                     </div>
                                 );
-                            })}
-                        </div>
-                    ) : (
-                        <div className="flex flex-col items-center justify-center h-64 text-center px-6">
-                            <div className="p-4 bg-slate-200/50 rounded-full mb-4">
-                                <MessageCircle className="h-8 w-8 text-slate-400" />
+                            })
+                        ) : (
+                            <div className="flex flex-col items-center justify-center h-full p-4 text-center opacity-50">
+                                <Terminal className="h-10 w-10 text-black mb-2" />
+                                <p className="font-mono font-bold text-xs text-black uppercase">NO ACTIVE CHANNELS FINDINGS</p>
                             </div>
-                            <p className="text-slate-600 font-medium mb-2">No conversations yet</p>
-                            <p className="text-sm text-slate-500">Start browsing products to connect with sellers</p>
-                        </div>
-                    )}
-                </div>
-            </aside>
+                        )}
+                    </div>
+                </aside>
 
-            {/* Main Chat Area */}
-            <main className="hidden md:flex w-2/3 flex-col bg-white">
-                {selectedChat ? (
-                    <>
-                        {/* Chat Header */}
-                        <header className="p-6 bg-gradient-to-r from-white to-slate-50 border-b border-slate-200/60 backdrop-blur-sm">
-                            <div className="flex items-center space-x-4">
-                                <div className="relative">
-                                    <Avatar className="h-12 w-12 ring-2 ring-slate-200">
-                                        <AvatarImage src={getOtherParticipant(selectedChat)?.avatar} />
-                                        <AvatarFallback className="bg-gradient-to-br from-indigo-100 to-indigo-200 text-indigo-700 font-semibold">
-                                            {getOtherParticipant(selectedChat)?.first_name?.[0] || <User className="h-5 w-5" />}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <div className="absolute -bottom-1 -right-1 h-4 w-4 bg-green-400 border-2 border-white rounded-full"></div>
-                                </div>
-                                <div>
-                                    <h2 className="text-xl font-bold text-slate-800">
-                                        {getOtherParticipant(selectedChat)?.first_name} {getOtherParticipant(selectedChat)?.last_name}
-                                    </h2>
-                                    <p className="text-sm text-green-600 font-medium">Active now</p>
-                                </div>
-                            </div>
-                        </header>
+                {/* MAIN CHAT AREA */}
+                <main className={`flex-1 flex flex-col bg-white overflow-hidden relative ${!selectedChat ? 'hidden md:flex' : 'flex'}`}>
 
-                        {/* Messages Area */}
-                        <div className="flex-1 p-6 overflow-y-auto bg-gradient-to-b from-slate-50/30 to-white">
-                            {loadingMessages ? (
-                                <div className="flex justify-center items-center h-64">
-                                    <div className="flex flex-col items-center space-y-4">
-                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-500"></div>
-                                        <p className="text-slate-500">Loading messages...</p>
+                    {selectedChat ? (
+                        <>
+                            {/* Chat Header */}
+                            <header className="p-4 bg-black border-b-[4px] border-white flex items-center justify-between shrink-0 shadow-[0_4px_0_0_#CCFF00] z-10">
+                                <div className="flex items-center gap-4">
+                                    <button
+                                        className="md:hidden bg-white text-black p-1 border-[2px] border-black"
+                                        onClick={() => setSelectedChat(null)}
+                                    >
+                                        <ArrowRight className="h-5 w-5 rotate-180" />
+                                    </button>
+
+                                    <div className="relative w-10 h-10 border-[3px] border-[#CCFF00] bg-gray-600 overflow-hidden shrink-0">
+                                        {getOtherParticipant(selectedChat)?.avatar ? (
+                                            <img src={getOtherParticipant(selectedChat)?.avatar} alt="avatar" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center font-ranchers text-xl text-white">
+                                                {getOtherParticipant(selectedChat)?.first_name?.[0]}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="min-w-0">
+                                        <h2 className="font-ranchers text-2xl text-white uppercase leading-none truncate">
+                                            {getOtherParticipant(selectedChat)?.first_name} {getOtherParticipant(selectedChat)?.last_name}
+                                        </h2>
+                                        <p className="font-mono text-[9px] font-bold text-[#CCFF00] uppercase tracking-widest flex items-center gap-1">
+                                            <span className="w-1.5 h-1.5 bg-[#CCFF00] inline-block animate-pulse rounded-full" /> LINK SECURE
+                                        </p>
                                     </div>
                                 </div>
-                            ) : messages.length === 0 ? (
-                                <div className="flex flex-col items-center justify-center h-64 text-center">
-                                    <div className="p-4 bg-blue-100 rounded-full mb-4">
-                                        <MessageCircle className="h-8 w-8 text-blue-600" />
+                            </header>
+
+                            {/* Messages Container */}
+                            <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 bg-gray-50 pb-24" style={{ backgroundImage: "radial-gradient(#000 1px, transparent 1px)", backgroundSize: "40px 40px" }}>
+                                {loadingMessages ? (
+                                    <div className="flex justify-center items-center h-full">
+                                        <div className="bg-[#CCFF00] border-[4px] border-black py-2 px-4 font-mono font-bold text-black uppercase flex items-center gap-2 sticker-rotate-2">
+                                            <Zap className="h-4 w-4 animate-bounce" /> DECRYPTING LOGS...
+                                        </div>
                                     </div>
-                                    <p className="text-slate-600 font-medium mb-2">Start the conversation</p>
-                                    <p className="text-sm text-slate-500">Send a message to begin chatting</p>
-                                </div>
-                            ) : (
-                                <div className="space-y-6">
-                                    {messages.map((msg, index) => {
+                                ) : messages.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center h-full text-center">
+                                        <div className="bg-white border-[4px] border-black p-6 py-4 font-mono font-bold text-xs uppercase neo-shadow-vault">
+                                            COMM LINK ESTABLISHED. INITIATE TRANSMISSION.
+                                        </div>
+                                    </div>
+                                ) : (
+                                    messages.map((msg, index) => {
                                         const isCurrentUser = msg.sender.id === user.id;
-                                        const showAvatar = index === 0 || messages[index - 1]?.sender.id !== msg.sender.id;
-                                        
                                         return (
-                                            <div key={msg.id} className={`flex items-end space-x-3 ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
-                                                {!isCurrentUser && (
-                                                    <Avatar className={`h-8 w-8 ${showAvatar ? 'opacity-100' : 'opacity-0'}`}>
-                                                        <AvatarImage src={msg.sender?.avatar} />
-                                                        <AvatarFallback className="bg-gradient-to-br from-slate-200 to-slate-300 text-slate-700 text-xs">
-                                                            {msg.sender?.first_name?.[0] || <User className="h-3 w-3" />}
-                                                        </AvatarFallback>
-                                                    </Avatar>
-                                                )}
-                                                
-                                                <div className={`max-w-sm lg:max-w-md ${isCurrentUser ? 'order-first' : ''}`}>
-                                                    <div className={`px-4 py-3 rounded-2xl shadow-sm ${
-                                                        isCurrentUser 
-                                                            ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-br-md' 
-                                                            : 'bg-white border border-slate-200 text-slate-800 rounded-bl-md'
-                                                    }`}>
-                                                        <p className="text-sm leading-relaxed">{msg.content}</p>
+                                            <div key={msg.id} className={`flex ${isCurrentUser ? 'justify-end' : 'justify-start'}`}>
+                                                <div className={`max-w-[85%] md:max-w-[70%] flex flex-col ${isCurrentUser ? 'items-end' : 'items-start'}`}>
+                                                    <div className={`p-4 border-[3px] border-black font-mono font-bold text-sm leading-relaxed whitespace-pre-line ${isCurrentUser
+                                                            ? 'bg-[#CCFF00] text-black rounded-bl-xl rounded-tl-xl rounded-tr-xl shadow-[4px_4px_0_0_#000]'
+                                                            : 'bg-white text-black rounded-br-xl rounded-tr-xl rounded-tl-xl shadow-[4px_4px_0_0_#000]'
+                                                        }`}>
+                                                        {msg.content}
                                                     </div>
-                                                    <p className={`text-xs mt-2 ${isCurrentUser ? 'text-right text-slate-400' : 'text-left text-slate-500'}`}>
+                                                    <span className="font-mono text-[9px] font-bold text-gray-500 uppercase mt-2 px-1 tracking-widest bg-white border-[1px] border-black px-1.5 py-0.5">
                                                         {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                    </p>
+                                                    </span>
                                                 </div>
-                                                
-                                                {isCurrentUser && (
-                                                    <Avatar className={`h-8 w-8 ${showAvatar ? 'opacity-100' : 'opacity-0'}`}>
-                                                        <AvatarImage src={user?.avatar} />
-                                                        <AvatarFallback className="bg-gradient-to-br from-indigo-200 to-purple-300 text-indigo-700 text-xs">
-                                                            {user?.first_name?.[0] || <User className="h-3 w-3" />}
-                                                        </AvatarFallback>
-                                                    </Avatar>
-                                                )}
                                             </div>
                                         );
-                                    })}
-                                </div>
-                            )}
-                            <div ref={messagesEndRef} />
-                        </div>
+                                    })
+                                )}
+                                <div ref={messagesEndRef} />
+                            </div>
 
-                        {/* Message Input */}
-                        <form onSubmit={handleSendMessage} className="p-6 bg-white border-t border-slate-200/60">
-                            <div className="flex items-end space-x-4">
-                                <div className="flex-1 relative">
-                                    <Input 
-                                        value={newMessage} 
-                                        onChange={(e) => setNewMessage(e.target.value)} 
-                                        placeholder="Type your message..." 
-                                        className="w-full px-4 py-3 pr-12 bg-slate-50 border-slate-200 rounded-xl focus:bg-white                                         focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                            {/* Message Builder */}
+                            <div className="p-4 bg-white border-t-[4px] border-black absolute bottom-0 right-0 left-0">
+                                <form onSubmit={handleSendMessage} className="flex gap-2 max-w-5xl mx-auto">
+                                    <input
+                                        type="text"
+                                        value={newMessage}
+                                        onChange={(e) => setNewMessage(e.target.value)}
+                                        placeholder="TERMINAL INPUT..."
+                                        className="flex-1 bg-gray-50 border-[3px] border-black px-4 py-3 font-mono font-bold text-sm text-black placeholder:text-gray-400 focus:outline-none focus:bg-[#CCFF00] uppercase transition-colors"
                                     />
-                                </div>
-                                <Button 
-                                    type="submit" 
-                                    disabled={!newMessage.trim()}
-                                    className="h-12 w-12 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl transition-all duration-200"
-                                >
-                                    <Send className="h-5 w-5" />
-                                </Button>
+                                    <button
+                                        type="submit"
+                                        disabled={!newMessage.trim()}
+                                        className="bg-black text-[#CCFF00] px-6 border-[3px] border-black border-l-0 hover:bg-[#CCFF00] hover:text-black transition-colors disabled:opacity-50 disabled:bg-gray-200 disabled:text-gray-400"
+                                    >
+                                        <Send className="h-6 w-6" />
+                                    </button>
+                                </form>
                             </div>
-                        </form>
-                    </>
-                ) : (
-                    <div className="flex-1 flex flex-col justify-center items-center bg-gradient-to-b from-slate-50/30 to-white">
-                        <div className="text-center max-w-md mx-auto px-6">
-                            <div className="p-6 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-                                <MessageCircle className="h-12 w-12 text-indigo-600" />
+                        </>
+                    ) : (
+                        <div className="flex-1 flex flex-col justify-center items-center bg-[#121212] bg-opacity-95 p-6">
+                            <div className="bg-[#CCFF00] border-[6px] border-black p-10 neo-shadow-volt text-center max-w-md sticker-rotate-2">
+                                <Terminal className="h-16 w-16 mx-auto mb-6 text-black" />
+                                <h3 className="font-ranchers text-4xl text-black uppercase mb-4">AWAITING CHANNEL SELECTION</h3>
+                                <p className="font-mono text-xs font-bold text-gray-800 uppercase mb-8 border-l-[4px] border-black pl-3 text-left">
+                                    SELECT A CHANNEL FROM THE LEFT PANEL TO ESTABLISH COMMS.
+                                </p>
+                                <Link href="/marketplace">
+                                    <button className="bg-black text-[#CCFF00] border-[4px] border-black px-6 py-3 font-mono font-bold uppercase text-sm hover:-translate-y-1 shadow-[4px_4px_0_0_#FFF] transition-all w-full">
+                                        RETURN TO MARKET
+                                    </button>
+                                </Link>
                             </div>
-                            <h3 className="text-2xl font-bold text-slate-800 mb-3">Welcome to Messages</h3>
-                            <p className="text-slate-600 mb-6 leading-relaxed">Select a conversation from the sidebar to start chatting, or browse our marketplace to connect with sellers.</p>
-                            <Link href="/marketplace" passHref>
-                                <Button className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
-                                    Browse Marketplace
-                                </Button>
-                            </Link>
                         </div>
-                    </div>
-                )}
-            </main>
+                    )}
+                </main>
+            </div>
         </div>
     );
 }
@@ -388,11 +369,8 @@ function ChatPageContent() {
 export default function ChatPage() {
     return (
         <Suspense fallback={
-            <div className="flex justify-center items-center h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
-                <div className="flex flex-col items-center space-y-4">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
-                    <p className="text-slate-600 font-medium">Loading...</p>
-                </div>
+            <div className="h-screen bg-[#121212] flex items-center justify-center">
+                <div className="w-16 h-16 border-[6px] border-[#CCFF00] border-t-black animate-spin rounded-full"></div>
             </div>
         }>
             <ChatPageContent />

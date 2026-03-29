@@ -1,58 +1,46 @@
 "use client"
-import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Search, ShoppingCart, Heart, MessageCircle, User, Menu, Plus, Bell, Sparkles } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { ShoppingCart, Heart, MessageCircle, User, Menu, Plus, Bell } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useState, useEffect } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 import { useAuth } from "@/components/auth-provider"
 import { fetchWishlistCount, fetchUnreadMessagesCount } from "@/utils/api"
 
 export default function Header() {
-  const [searchQuery, setSearchQuery] = useState("")
   const { user, logout, isAuthenticated } = useAuth()
   const router = useRouter()
-  
-  // State for notification counts
+
   const [wishlistCount, setWishlistCount] = useState(0);
   const [unreadMessages, setUnreadMessages] = useState(0);
 
   useEffect(() => {
-    // Fetch counts only if the user is authenticated
     if (isAuthenticated) {
       const fetchCounts = async () => {
-        const [wishlistNum, messagesNum] = await Promise.all([
-          fetchWishlistCount(),
-          fetchUnreadMessagesCount()
-        ]);
-        setWishlistCount(wishlistNum);
-        setUnreadMessages(messagesNum);
+        try {
+          const [wishlistNum, messagesNum] = await Promise.all([
+            fetchWishlistCount(),
+            fetchUnreadMessagesCount()
+          ]);
+          setWishlistCount(wishlistNum);
+          setUnreadMessages(messagesNum);
+        } catch (e) {
+          console.error(e)
+        }
       };
       fetchCounts();
-      
-      // Optional: Poll for new messages periodically
-      const interval = setInterval(fetchCounts, 30000); // every 30 seconds
+      const interval = setInterval(fetchCounts, 30000);
       return () => clearInterval(interval);
     }
   }, [isAuthenticated]);
-
-  const handleSearch = (e) => {
-    e.preventDefault()
-    if (searchQuery.trim()) {
-      router.push(`/marketplace?search=${encodeURIComponent(searchQuery)}`)
-    }
-  }
 
   const handleSellClick = () => {
     if (isAuthenticated) {
@@ -62,242 +50,161 @@ export default function Header() {
     }
   }
 
-  // Creative profile avatar component
-  const ProfileAvatar = ({ size = "h-8 w-8" }) => (
-    <div className="relative group">
-      <div className={`${size} rounded-full bg-gradient-to-br from-violet-500 via-purple-500 to-indigo-600 p-0.5 group-hover:from-violet-400 group-hover:via-purple-400 group-hover:to-indigo-500 transition-all duration-300`}>
-        <div className={`${size} rounded-full bg-white flex items-center justify-center relative overflow-hidden`}>
-          {user?.avatar ? (
-            <img 
-              src={user.avatar} 
-              alt={user?.name} 
-              className="w-full h-full rounded-full object-cover"
-            />
-          ) : (
-            <div className="relative w-full h-full bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center">
-              <span className="text-violet-600 font-bold text-sm">
-                {user?.name?.charAt(0).toUpperCase() || "U"}
-              </span>
-              <div className="absolute -top-1 -right-1">
-                <Sparkles className="h-3 w-3 text-violet-400 animate-pulse" />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-      {/* Status indicator */}
-      <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 bg-green-400 border-2 border-white rounded-full group-hover:bg-green-300 transition-colors duration-300"></div>
+  const ProfileAvatar = ({ size = "h-12 w-12" }) => (
+    <div className={`relative ${size} bg-black border-[3px] border-black flex items-center justify-center neo-shadow-black hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all sticker-rotate-2 group cursor-pointer`}>
+      {user?.avatar ? (
+        <img
+          src={user.avatar}
+          alt={user?.name}
+          className="w-full h-full object-cover"
+        />
+      ) : (
+        <span className="text-[#CCFF00] font-mono font-bold text-lg uppercase">
+          {user?.name?.charAt(0) || "U"}
+        </span>
+      )}
     </div>
   )
 
   return (
-    <header className="bg-white shadow-lg sticky top-0 z-50 border-b border-gray-200 backdrop-blur-md bg-white/95">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 group">
-            <div className="bg-gradient-to-r from-violet-600 to-indigo-600 p-2 rounded-xl transform group-hover:scale-110 transition-all duration-300 group-hover:rotate-3 shadow-lg group-hover:shadow-xl group-hover:shadow-violet-200">
-              <ShoppingCart className="h-6 w-6 text-white" />
-            </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent group-hover:from-violet-500 group-hover:to-indigo-500 transition-all duration-300">
-              JUgaadu
-            </span>
-          </Link>
-
-          {/* Search Bar */}
-          <div className="hidden md:flex flex-1 max-w-lg mx-8">
-            <form onSubmit={handleSearch} className="relative w-full group">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 group-focus-within:text-violet-500 transition-colors duration-200" />
-              <Input
-                type="text"
-                placeholder="Search for books, gadgets, notes..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 rounded-full focus:ring-2 focus:ring-violet-500 focus:border-transparent transition-all duration-200 hover:shadow-md focus:shadow-lg focus:shadow-violet-100 border-gray-200 hover:border-violet-200"
-              />
-            </form>
+    <header className="sticky top-0 z-40 bg-white border-b-[4px] border-black py-4 px-6 md:px-10 flex justify-between items-center transition-all">
+      {/* LEFT: LOGO */}
+      <div className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-4 group">
+          <div className="w-12 h-12 bg-black flex items-center justify-center border-[3px] border-[#CCFF00] sticker-rotate-1 group-hover:-rotate-3 transition-transform neo-shadow-volt">
+            <ShoppingCart className="text-[#CCFF00] h-6 w-6" />
           </div>
+          <span className="text-black font-ranchers text-3xl md:text-5xl tracking-wide uppercase whitespace-nowrap">JUgaadu</span>
+        </Link>
+      </div>
 
-          {/* Navigation */}
-          <nav className="hidden md:flex items-center space-x-4">
-            <Button
-              onClick={handleSellClick}
-              className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl hover:shadow-green-200 transition-all duration-300 transform hover:-translate-y-0.5"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Sell Item
-            </Button>
+      {/* RIGHT: NAVIGATION */}
+      <div className="flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-6">
+          <button
+            onClick={handleSellClick}
+            className="font-mono bg-[#CCFF00] text-black px-6 py-3 border-[3px] border-black font-extrabold text-sm uppercase neo-shadow-black hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0px_#000] hover:bg-black hover:text-[#CCFF00] transition-all flex items-center gap-3"
+          >
+            <Plus className="h-5 w-5 border-2 border-current rounded-full" />
+            SHIP IT
+          </button>
 
-            <Link href="/marketplace">
-              <Button variant="ghost" className="text-gray-700 hover:text-violet-600 hover:bg-violet-50 transition-all duration-200">
-                Marketplace
-              </Button>
-            </Link>
-
-            {isAuthenticated ? (
-              <>
-                <Link href="/wishlist" className="relative">
-                  <Button variant="ghost" size="icon" className="hover:bg-red-50 transition-all duration-200">
-                    <Heart className="h-5 w-5 text-gray-700 hover:text-red-500 transition-colors duration-200" />
-                  </Button>
-                  {wishlistCount > 0 && (
-                    <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs h-5 w-5 flex items-center justify-center rounded-full animate-pulse shadow-lg">
-                      {wishlistCount > 99 ? '99+' : wishlistCount}
-                    </Badge>
-                  )}
-                </Link>
-
-                <Link href="/chat" className="relative">
-                  <Button variant="ghost" size="icon" className="hover:bg-green-50 transition-all duration-200">
-                    <MessageCircle className="h-5 w-5 text-gray-700 hover:text-green-500 transition-colors duration-200" />
-                  </Button>
-                  {unreadMessages > 0 && (
-                    <Badge className="absolute -top-2 -right-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs h-5 w-5 flex items-center justify-center rounded-full animate-bounce shadow-lg">
-                      {unreadMessages > 99 ? '99+' : unreadMessages}
-                    </Badge>
-                  )}
-                </Link>
-
-                <Button variant="ghost" size="icon" className="hover:bg-violet-50 transition-all duration-200 relative">
-                  <Bell className="h-5 w-5 text-gray-700 hover:text-violet-500 transition-colors duration-200" />
-                  {/* Notification pulse dot */}
-                  <div className="absolute top-2 right-2 h-2 w-2 bg-violet-400 rounded-full animate-ping opacity-75"></div>
-                  <div className="absolute top-2 right-2 h-2 w-2 bg-violet-500 rounded-full"></div>
-                </Button>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="relative rounded-full p-1 hover:bg-violet-50 transition-all duration-300">
-                      <ProfileAvatar />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-64 shadow-xl border-0 bg-white/95 backdrop-blur-md" align="end" forceMount>
-                    <DropdownMenuLabel className="font-normal p-4">
-                      <div className="flex items-center space-x-3">
-                        <ProfileAvatar size="h-12 w-12" />
-                        <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-semibold leading-none text-gray-800">{user?.name}</p>
-                          <p className="text-xs leading-none text-violet-600 bg-violet-100 px-2 py-1 rounded-full w-fit">
-                            {user?.email}
-                          </p>
-                        </div>
-                      </div>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator className="bg-gradient-to-r from-transparent via-violet-200 to-transparent" />
-                    <DropdownMenuItem onClick={() => router.push("/profile")} className="hover:bg-violet-50 transition-colors duration-200 cursor-pointer">
-                      <User className="mr-3 h-4 w-4 text-violet-500" />
-                      <span className="text-gray-700">Profile</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push("/my-listings")} className="hover:bg-violet-50 transition-colors duration-200 cursor-pointer">
-                      <ShoppingCart className="mr-3 h-4 w-4 text-violet-500" />
-                      <span className="text-gray-700">My Listings</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => router.push("/settings")} className="hover:bg-violet-50 transition-colors duration-200 cursor-pointer">
-                      <Sparkles className="mr-3 h-4 w-4 text-violet-500" />
-                      <span className="text-gray-700">Settings</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator className="bg-gradient-to-r from-transparent via-violet-200 to-transparent" />
-                    <DropdownMenuItem onClick={logout} className="hover:bg-red-50 text-red-600 transition-colors duration-200 cursor-pointer">
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (
-              <div className="flex space-x-2">
-                <Link href="/login">
-                  <Button variant="ghost" className="text-violet-600 hover:text-violet-800 hover:bg-violet-50 transition-all duration-200">
-                    Login
-                  </Button>
-                </Link>
-                <Link href="/signup">
-                  <Button className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl hover:shadow-violet-200 transition-all duration-300 transform hover:-translate-y-0.5">
-                    Sign Up
-                  </Button>
-                </Link>
-              </div>
-            )}
-          </nav>
-
-          {/* Mobile menu */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden hover:bg-violet-50">
-                <Menu className="h-6 w-6 text-gray-700" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px] bg-white/95 backdrop-blur-md border-l border-violet-100">
-              <div className="flex flex-col space-y-4 mt-4">
-                <form onSubmit={handleSearch} className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 focus:ring-violet-500 focus:border-violet-500"
-                  />
-                </form>
-
-                <Button onClick={handleSellClick} className="w-full justify-start bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Sell Item
-                </Button>
-
-                <Link href="/marketplace">
-                  <Button variant="ghost" className="w-full justify-start hover:bg-violet-50">
-                    Marketplace
-                  </Button>
-                </Link>
-
-                {isAuthenticated ? (
-                  <>
-                    <Link href="/wishlist">
-                      <Button variant="ghost" className="w-full justify-start hover:bg-red-50">
-                        <Heart className="mr-2 h-4 w-4 text-red-500" />
-                        Wishlist
-                        {wishlistCount > 0 && (
-                          <Badge className="ml-auto bg-red-500">{wishlistCount}</Badge>
-                        )}
-                      </Button>
-                    </Link>
-                    <Link href="/chat">
-                      <Button variant="ghost" className="w-full justify-start hover:bg-green-50">
-                        <MessageCircle className="mr-2 h-4 w-4 text-green-500" />
-                        Messages
-                        {unreadMessages > 0 && (
-                          <Badge className="ml-auto bg-green-500">{unreadMessages}</Badge>
-                        )}
-                      </Button>
-                    </Link>
-                    <Link href="/profile">
-                      <Button variant="ghost" className="w-full justify-start hover:bg-violet-50">
-                        <User className="mr-2 h-4 w-4 text-violet-500" />
-                        Profile
-                      </Button>
-                    </Link>
-                    <Button onClick={logout} variant="ghost" className="w-full justify-start hover:bg-red-50 text-red-600">
-                      Log out
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Link href="/login">
-                      <Button variant="ghost" className="w-full justify-start hover:bg-violet-50 text-violet-600">
-                        Login
-                      </Button>
-                    </Link>
-                    <Link href="/signup">
-                      <Button className="w-full justify-start bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700">
-                        Sign Up
-                      </Button>
-                    </Link>
-                  </>
+          {isAuthenticated ? (
+            <div className="flex items-center gap-5 ml-4">
+              <Link href="/wishlist" className="relative group">
+                <div className="w-12 h-12 bg-white border-[3px] border-black flex items-center justify-center neo-shadow-black group-hover:bg-black group-hover:text-[#CCFF00] transition-colors">
+                  <Heart className="h-5 w-5 current-color" />
+                </div>
+                {wishlistCount > 0 && (
+                  <Badge className="absolute -top-3 -right-3 border-[3px] border-black bg-[#CCFF00] text-black font-mono font-bold text-xs px-2 py-1 rounded-none neo-shadow-black">
+                    {wishlistCount > 99 ? '99+' : wishlistCount}
+                  </Badge>
                 )}
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
+              </Link>
+
+              <Link href="/chat" className="relative group">
+                <div className="w-12 h-12 bg-white border-[3px] border-black flex items-center justify-center neo-shadow-black group-hover:bg-black group-hover:text-[#CCFF00] transition-colors">
+                  <MessageCircle className="h-5 w-5 current-color" />
+                </div>
+                {unreadMessages > 0 && (
+                  <Badge className="absolute -top-3 -right-3 border-[3px] border-black bg-[#CCFF00] text-black font-mono font-bold text-xs px-2 py-1 rounded-none neo-shadow-black">
+                    {unreadMessages > 99 ? '99+' : unreadMessages}
+                  </Badge>
+                )}
+              </Link>
+
+              <Link href="/notifications" className="relative group">
+                <div className="w-12 h-12 bg-white border-[3px] border-black flex items-center justify-center neo-shadow-black group-hover:bg-black group-hover:text-[#CCFF00] transition-colors">
+                  <Bell className="h-5 w-5 current-color" />
+                </div>
+                <div className="absolute -top-2 -right-2 h-4 w-4 bg-[#CCFF00] border-[3px] border-black rounded-none"></div>
+              </Link>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="outline-none focus:outline-none ml-2">
+                    <ProfileAvatar />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56 font-mono uppercase font-bold border-[4px] border-black rounded-none neo-shadow-black bg-white mt-2 p-0" align="end" sideOffset={8}>
+                  <DropdownMenuLabel className="p-4 border-b-[4px] border-black bg-gray-100">
+                    <div className="flex flex-col">
+                      <span className="text-black text-base truncate">{user?.name}</span>
+                      <span className="text-gray-500 text-xs mt-1 truncate">{user?.email}</span>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => router.push("/profile")} className="cursor-pointer p-4 border-b-[4px] border-black hover:bg-[#CCFF00] hover:text-black focus:bg-[#CCFF00] focus:text-black rounded-none flex items-center text-sm">
+                    <User className="mr-3 h-5 w-5" /> PROFILE
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/my-listings")} className="cursor-pointer p-4 border-b-[4px] border-black hover:bg-[#CCFF00] hover:text-black focus:bg-[#CCFF00] focus:text-black rounded-none flex items-center text-sm">
+                    <ShoppingCart className="mr-3 h-5 w-5" /> LISTINGS
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={logout} className="cursor-pointer p-4 hover:bg-black hover:text-[#CCFF00] focus:bg-black focus:text-[#CCFF00] rounded-none flex items-center text-sm transition-colors">
+                    LOGOUT
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ) : (
+            <div className="flex gap-4 ml-4">
+              <Link href="/login" className="font-mono bg-white text-black px-8 py-3 border-[3px] border-black font-extrabold uppercase neo-shadow-black hover:translate-x-1 hover:translate-y-1 hover:shadow-[4px_4px_0px_#000] transition-all text-sm">
+                LOGIN
+              </Link>
+            </div>
+          )}
+        </nav>
+
+        {/* Mobile menu sheet */}
+        <Sheet>
+          <SheetTrigger asChild>
+            <button className="md:hidden w-12 h-12 bg-white border-[3px] border-black flex items-center justify-center neo-shadow-black active:translate-x-1 active:translate-y-1 active:shadow-none transition-all">
+              <Menu className="h-6 w-6 text-black" />
+            </button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-[85vw] sm:w-[350px] bg-white border-l-[6px] border-black p-6 flex flex-col font-mono uppercase">
+            <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
+            <SheetDescription className="sr-only">Mobile Navigation Menu</SheetDescription>
+            <div className="font-ranchers text-5xl mb-8 mt-4 tracking-wider text-black">JUgaadu</div>
+
+            <div className="flex flex-col gap-4">
+              <button onClick={handleSellClick} className="w-full font-mono bg-[#CCFF00] text-black px-4 py-4 border-[4px] border-black font-bold uppercase neo-shadow-black text-center text-base active:translate-x-1 active:translate-y-1 active:shadow-none flex items-center justify-center gap-3">
+                <Plus className="h-5 w-5 border-2 border-black rounded-full" /> SHIP IT
+              </button>
+
+              <Link href="/marketplace" className="w-full font-mono bg-white text-black px-4 py-4 border-[4px] border-black font-bold uppercase neo-shadow-black text-center text-base active:translate-x-1 active:translate-y-1 active:shadow-none flex justify-center">
+                MARKETPLACE
+              </Link>
+
+              {isAuthenticated ? (
+                <>
+                  <Link href="/notifications" className="w-full flex justify-between items-center font-mono bg-white text-black px-4 py-4 border-[4px] border-black font-bold uppercase neo-shadow-black text-base active:translate-x-1 active:translate-y-1 active:shadow-none">
+                    <span className="flex items-center gap-3"><Bell className="h-5 w-5" /> NOTIFS</span>
+                  </Link>
+                  <Link href="/wishlist" className="w-full flex justify-between items-center font-mono bg-white text-black px-4 py-4 border-[4px] border-black font-bold uppercase neo-shadow-black text-base active:translate-x-1 active:translate-y-1 active:shadow-none">
+                    <span className="flex items-center gap-3"><Heart className="h-5 w-5" /> WISHLIST</span>
+                    {wishlistCount > 0 && <span className="bg-[#CCFF00] px-3 py-1 text-black border-[3px] border-black text-sm">{wishlistCount}</span>}
+                  </Link>
+                  <Link href="/chat" className="w-full flex justify-between items-center font-mono bg-white text-black px-4 py-4 border-[4px] border-black font-bold uppercase neo-shadow-black text-base active:translate-x-1 active:translate-y-1 active:shadow-none">
+                    <span className="flex items-center gap-3"><MessageCircle className="h-5 w-5" /> MESSAGES</span>
+                    {unreadMessages > 0 && <span className="bg-[#CCFF00] px-3 py-1 text-black border-[3px] border-black text-sm">{unreadMessages}</span>}
+                  </Link>
+                  <Link href="/profile" className="w-full flex items-center gap-3 font-mono bg-white text-black px-4 py-4 border-[4px] border-black font-bold uppercase neo-shadow-black text-base active:translate-x-1 active:translate-y-1 active:shadow-none">
+                    <User className="h-5 w-5" /> PROFILE
+                  </Link>
+                  <button onClick={logout} className="w-full font-mono bg-black text-white px-4 py-4 border-[4px] border-black font-bold uppercase mt-6 text-base hover:bg-[#CCFF00] hover:text-black transition-colors">
+                    LOGOUT
+                  </button>
+                </>
+              ) : (
+                <div className="flex flex-col gap-4 mt-6">
+                  <Link href="/login" className="w-full text-center flex justify-center font-mono bg-black text-white px-4 py-4 border-[4px] border-black font-bold uppercase neo-shadow-black text-base active:translate-x-1 active:translate-y-1 active:shadow-none">
+                    LOGIN
+                  </Link>
+                </div>
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </header>
   )

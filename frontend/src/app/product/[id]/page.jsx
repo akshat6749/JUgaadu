@@ -13,7 +13,6 @@ import {
 } from "@/utils/api";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import { Button } from "@/components/ui/button";
 import {
   Heart,
   MessageCircle,
@@ -22,11 +21,10 @@ import {
   Star,
   MapPin,
   Shield,
-  AlertTriangle,
   CreditCard,
   CheckCircle,
-  Clock,
   Package,
+  User,
 } from "lucide-react";
 
 export default function ProductDetailPage() {
@@ -52,8 +50,7 @@ export default function ProductDetailPage() {
           setIsWishlisted(productData.is_in_wishlist || false);
         }
       } catch (err) {
-        console.error("Failed to load product:", err);
-        setError("Failed to load product details. Please try again.");
+        setError("DATA CORRUPTED OR ITEM SECURED.");
       } finally {
         setLoading(false);
       }
@@ -70,24 +67,14 @@ export default function ProductDetailPage() {
     try {
       if (isWishlisted) {
         await removeFromWishlist(params.id);
-        toast({
-          title: "Removed from wishlist",
-          description: "Item has been removed from your wishlist.",
-        });
+        toast({ title: "CLEARED", description: "REMOVED FROM WISHLIST." });
       } else {
         await addToWishlist(params.id);
-        toast({
-          title: "Added to wishlist",
-          description: "Item has been added to your wishlist.",
-        });
+        toast({ title: "SECURED", description: "ADDED TO WISHLIST." });
       }
       setIsWishlisted(!isWishlisted);
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update wishlist. Please try again.",
-        variant: "destructive",
-      });
+      toast({ title: "ERROR", description: "WISHLIST OPERATION FAILED.", variant: "destructive" });
     }
   };
 
@@ -95,55 +82,39 @@ export default function ProductDetailPage() {
     e.stopPropagation();
 
     if (!user) {
-        toast({
-            title: "Please log in",
-            description: "You need to be logged in to contact a seller.",
-        });
-        router.push('/login');
-        return;
+      toast({ title: "AUTH FAILED", description: "LOGIN REQUIRED." });
+      router.push('/login');
+      return;
     }
 
     if (user.id === product.seller.id) {
-        toast({
-            title: "This is your listing",
-            description: "You cannot start a conversation with yourself.",
-        });
-        return;
+      toast({ title: "INVALID COMMAND", description: "CANNOT COMMS SELF." });
+      return;
     }
 
     try {
-        const conversation = await startConversation(product.seller.id, product.id);
-        // The API returns the conversation object which has an 'id'
-        router.push(`/chat?chatId=${conversation.id}`);
+      const conversation = await startConversation(product.seller.id, product.id);
+      router.push(`/chat?chatId=${conversation.id}`);
     } catch (error) {
-        // Handle cases where the conversation might already exist and the API returns an error
-        if (error.response && error.response.data && error.response.data.chat_id) {
-            router.push(`/chat?chatId=${error.response.data.chat_id}`);
-        } else {
-             console.error("Failed to start conversation:", error);
-            toast({
-                title: "Error",
-                description: "Could not start the chat. Please try again later.",
-                variant: "destructive",
-            });
-        }
+      if (error.response?.data?.chat_id) {
+        router.push(`/chat?chatId=${error.response.data.chat_id}`);
+      } else {
+        toast({ title: "COMMS FAILED", description: "SIGNAL DROPPED.", variant: "destructive" });
+      }
     }
   };
 
   const handleBuyNow = () => {
     if (!isAuthenticated) {
       router.push('/login');
-      toast({
-          title: "Authentication Required",
-          description: "Please log in to purchase an item.",
-      });
+      toast({ title: "AUTH REQUIRED", description: "LOGIN TO PURCHASE." });
       return;
     }
     const queryParams = new URLSearchParams({
-        productId: product.id,
-        amount: product.price,
-        name: product.name,
-        image: product.images?.[0]?.image || ''
+      productId: product.id,
+      amount: product.price,
+      name: product.name,
+      image: product.images?.[0]?.image || ''
     });
     router.push(`/payment?${queryParams.toString()}`);
   };
@@ -152,31 +123,23 @@ export default function ProductDetailPage() {
     if (navigator.share) {
       navigator.share({
         title: product.name,
-        text: `Check out this item: ${product.name}`,
+        text: `CHECK OUT: ${product.name}`,
         url: window.location.href,
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
-      toast({ title: "Link Copied!", description: "Product link copied to clipboard." });
+      toast({ title: "LINK COPIED", description: "COPIED TO CLIPBOARD." });
     }
   };
 
   if (loading || authLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+      <div className="min-h-screen bg-[#121212] font-jakarta selection:bg-[#CCFF00] selection:text-black">
         <Header />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="animate-pulse space-y-8">
-            <div className="h-8 bg-white/20 rounded-lg w-1/3"></div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              <div className="bg-white/10 backdrop-blur-lg rounded-2xl h-96 border border-white/20"></div>
-              <div className="space-y-6">
-                <div className="h-8 bg-white/20 rounded-lg w-3/4"></div>
-                <div className="h-6 bg-white/20 rounded-lg w-1/4"></div>
-                <div className="h-24 bg-white/20 rounded-lg"></div>
-                <div className="h-10 bg-white/20 rounded-lg w-1/2"></div>
-              </div>
-            </div>
+        <div className="max-w-6xl mx-auto px-4 py-16 flex items-center justify-center min-h-[50vh]">
+          <div className="bg-[#CCFF00] border-[6px] border-black p-8 neo-shadow-black sticker-rotate-1 inline-flex items-center gap-4">
+            <div className="w-6 h-6 border-4 border-black border-t-transparent animate-spin rounded-full"></div>
+            <h2 className="font-ranchers text-4xl uppercase text-black">ACCESSING DATABANKS...</h2>
           </div>
         </div>
         <Footer />
@@ -186,20 +149,21 @@ export default function ProductDetailPage() {
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+      <div className="min-h-screen bg-[#121212] font-jakarta selection:bg-[#CCFF00] selection:text-black">
         <Header />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-          <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-12 border border-white/20 shadow-2xl">
-            <AlertTriangle className="h-20 w-20 text-orange-400 mx-auto mb-6" />
-            <h1 className="text-3xl font-bold text-white mb-4">Product Not Found</h1>
-            <p className="text-white/80 mb-8 text-lg">
-              {error || "The product you're looking for doesn't exist or has been removed."}
+        <div className="max-w-5xl mx-auto px-4 py-16 text-center">
+          <div className="bg-white border-[6px] border-black p-12 neo-shadow-volt max-w-2xl mx-auto">
+            <div className="bg-black text-[#CCFF00] w-24 h-24 mx-auto border-[4px] border-[#CCFF00] flex items-center justify-center mb-6 sticker-rotate-2 pointer-events-none">
+              <h1 className="font-ranchers text-5xl">404</h1>
+            </div>
+            <h1 className="text-4xl font-ranchers text-black mb-4 uppercase">ASSET UNREACHABLE</h1>
+            <p className="font-mono text-gray-500 font-bold uppercase mb-8 border-l-[4px] border-black pl-3 text-left">
+              {error || "THE ITEM HAS BEEN SCRUBBED OR SECURED BY ANOTHER BUYER."}
             </p>
             <Link href="/marketplace" passHref>
-               <Button className="bg-orange-500 hover:bg-orange-600 text-white px-8 py-3 rounded-xl font-semibold shadow-lg">
-                  <ArrowLeft className="h-5 w-5 inline mr-2" />
-                  Back to Marketplace
-               </Button>
+              <button className="bg-[#CCFF00] text-black border-[4px] border-black px-6 py-3 font-mono font-bold uppercase transition-all hover:translate-x-1 hover:translate-y-1 hover:shadow-none neo-shadow-black inline-flex items-center">
+                <ArrowLeft className="h-5 w-5 mr-3" /> RETURN TO MARKET
+              </button>
             </Link>
           </div>
         </div>
@@ -208,224 +172,190 @@ export default function ProductDetailPage() {
     );
   }
 
-  const productImages = product.images?.length > 0 ? product.images : [{ image: "https://placehold.co/600x600/eee/ccc?text=Product" }];
+  const productImages = product.images?.length > 0 ? product.images : [{ image: "https://placehold.co/600x600/000000/CCFF00?text=NO+IMAGE" }];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+    <div className="min-h-screen bg-[#121212] font-jakarta selection:bg-[#CCFF00] selection:text-black pb-12">
       <Header />
-      
-      {/* Breadcrumb */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-        <nav className="flex items-center space-x-2 text-white/70 text-sm">
-          <Link href="/marketplace" className="hover:text-white transition-colors">Marketplace</Link>
-          <span>/</span>
-          <span className="text-white">{product.name}</span>
-        </nav>
+
+      {/* Breadcrumb Brutalist */}
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8 py-4">
+        <div className="bg-black text-[#CCFF00] inline-block border-[3px] border-[#CCFF00] px-3 py-1 font-mono text-[10px] font-bold uppercase">
+          <Link href="/marketplace" className="hover:text-white transition-colors">MARKET</Link>
+          <span className="mx-2 text-white">//</span>
+          <span className="text-white truncate max-w-[200px] inline-block align-bottom">{product.name}</span>
+        </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
-          {/* Product Images */}
-          <div className="space-y-4">
-            <div className="bg-white/10 backdrop-blur-lg rounded-3xl overflow-hidden border border-white/20 shadow-2xl">
-              <div className="relative group">
+      <div className="max-w-[1400px] mx-auto px-4 md:px-8 mt-4">
+        <div className="flex flex-col lg:flex-row gap-8 items-start">
+
+          {/* LEFT: Product Images Box */}
+          <div className="w-full lg:w-5/12 shrink-0 space-y-4">
+            {/* Main Image */}
+            <div className="bg-white border-[6px] border-black p-2 neo-shadow-vault relative group">
+              <div className="border-[4px] border-black bg-black h-[400px] md:h-[500px] relative overflow-hidden">
                 <img
                   src={productImages[selectedImageIndex]?.image}
                   alt={product.name}
-                  className="w-full h-[500px] object-cover transform group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-110 opacity-90 hover:opacity-100"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="absolute top-6 right-6 flex flex-col space-y-3">
+
+                {/* Action overlays */}
+                <div className="absolute top-4 right-4 flex flex-col gap-3">
                   <button
                     onClick={toggleWishlist}
-                    className={`p-4 rounded-full backdrop-blur-lg transition-all duration-300 transform hover:scale-110 shadow-xl border-2 ${
-                      isWishlisted 
-                        ? "bg-red-500 text-white border-red-400 shadow-red-500/50" 
-                        : "bg-white/90 text-gray-700 hover:bg-white border-white/50 shadow-black/20"
-                    }`}
+                    className={`w-12 h-12 flex items-center justify-center border-[4px] border-black transition-colors ${isWishlisted ? "bg-red-500 text-white shadow-[4px_4px_0_0_#000]" : "bg-white text-black hover:bg-[#CCFF00] neo-shadow-black"
+                      }`}
                   >
-                    <Heart className={`h-7 w-7 ${isWishlisted ? "fill-current" : ""}`} />
+                    <Heart className={`h-6 w-6 ${isWishlisted ? "fill-current" : ""}`} />
                   </button>
                   <button
                     onClick={handleShare}
-                    className="p-4 bg-white/90 backdrop-blur-lg rounded-full text-gray-700 hover:bg-white border-2 border-white/50 transition-all duration-300 transform hover:scale-110 shadow-xl shadow-black/20"
+                    className="w-12 h-12 flex items-center justify-center bg-white border-[4px] border-black text-black hover:bg-[#CCFF00] transition-colors neo-shadow-black"
                   >
-                    <Share2 className="h-7 w-7" />
+                    <Share2 className="h-6 w-6" />
                   </button>
+                </div>
+
+                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                  <div className="bg-[#CCFF00] text-black border-[3px] border-black px-2 py-1 font-mono font-bold text-xs uppercase shadow-[4px_4px_0_0_#000]">
+                    {product.condition}
+                  </div>
+                  {product.is_sold && (
+                    <div className="bg-red-600 text-white border-[3px] border-black px-2 py-1 font-mono font-bold text-xs uppercase shadow-[4px_4px_0_0_#FFF]">
+                      SOLD OUT
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-            
-            {/* Image thumbnails */}
+
+            {/* Thumbnails */}
             {productImages.length > 1 && (
-              <div className="flex space-x-3 overflow-x-auto pb-2">
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                 {productImages.map((img, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
-                    className={`flex-shrink-0 w-24 h-24 rounded-xl overflow-hidden border-2 transition-all duration-300 ${
-                      selectedImageIndex === index 
-                        ? "border-orange-400 shadow-lg" 
-                        : "border-white/20 hover:border-white/40"
-                    }`}
+                    className={`shrink-0 w-24 h-24 border-[4px] border-black bg-black overflow-hidden transition-all ${selectedImageIndex === index ? 'shadow-[4px_4px_0_0_#CCFF00] -translate-y-1' : 'hover:-translate-y-1 hover:shadow-[4px_4px_0_0_#FFF]'
+                      }`}
                   >
-                    <img
-                      src={img.image}
-                      alt={`${product.name} ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={img.image} className="w-full h-full object-cover opacity-80 hover:opacity-100" alt="thumb" />
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Product Info */}
-          <div className="space-y-8">
-            <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl">
-              <h1 className="text-4xl font-bold text-white mb-4 leading-tight">{product.name}</h1>
-              
-              <div className="flex items-center justify-between mb-6">
-                <span className="text-4xl font-bold text-orange-400">₹{product.price}</span>
-                <div className="flex items-center space-x-2 text-green-400">
-                  <CheckCircle className="h-5 w-5" />
-                  <span className="font-medium">Available</span>
+          {/* RIGHT: Product Info Box */}
+          <div className="flex-1 w-full space-y-6">
+
+            {/* Core Info */}
+            <div className="bg-white border-[6px] border-black p-6 md:p-10 neo-shadow-black">
+              <div className="flex justify-between items-start gap-4 flex-col sm:flex-row mb-6 pb-6 border-b-[4px] border-black">
+                <div>
+                  <h1 className="font-ranchers text-4xl md:text-6xl text-black uppercase leading-none mb-3">{product.name}</h1>
+                  <p className="font-mono text-xs font-bold text-gray-500 uppercase flex items-center gap-2">
+                    <Package className="h-4 w-4 shrink-0" /> POSTED REGISTRY
+                  </p>
+                </div>
+
+                <div className="shrink-0 text-left sm:text-right">
+                  <div className="font-ranchers text-5xl text-black">₹{product.price}</div>
+                  <div className="font-mono text-xs font-bold text-black border-[2px] border-black px-2 py-1 bg-[#CCFF00] inline-flex items-center shadow-[3px_3px_0_0_#000] mt-1">
+                    <CheckCircle className="h-3 w-3 mr-1" /> CLEARED
+                  </div>
                 </div>
               </div>
 
-              {/* Quick Info */}
-              <div className="grid grid-cols-3 gap-4 mb-8 p-4 bg-white/5 rounded-2xl border border-white/10">
-                <div className="text-center">
-                  <Shield className="h-6 w-6 text-green-400 mx-auto mb-2" />
-                  <p className="text-white/80 text-sm">Verified</p>
-                </div>
-                <div className="text-center">
-                  <Package className="h-6 w-6 text-blue-400 mx-auto mb-2" />
-                  <p className="text-white/80 text-sm">Safe Deal</p>
-                </div>
-                <div className="text-center">
-                  <Clock className="h-6 w-6 text-purple-400 mx-auto mb-2" />
-                  <p className="text-white/80 text-sm">Quick Chat</p>
-                </div>
+              <div className="border-l-[4px] border-[#CCFF00] pl-4 mb-8">
+                <h2 className="font-mono font-bold text-sm text-black uppercase mb-2">ASSET DESCRIPTION</h2>
+                <p className="font-jakarta whitespace-pre-line text-black leading-relaxed text-base font-medium">
+                  {product.description}
+                </p>
               </div>
 
-              <div className="border-t border-white/20 pt-6">
-                <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
-                  <Package className="h-5 w-5 mr-2 text-orange-400" />
-                  Description
-                </h2>
-                <p className="text-white/90 whitespace-pre-line leading-relaxed text-lg">{product.description}</p>
-              </div>
+              {user?.id !== product.seller?.id ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t-[4px] border-black mt-auto">
+                  <button
+                    onClick={handleBuyNow}
+                    disabled={product.is_sold}
+                    className={`flex justify-center items-center py-4 border-[4px] border-black font-ranchers text-2xl uppercase tracking-widest transition-all ${product.is_sold ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-[#CCFF00] text-black hover:translate-y-1 hover:translate-x-1 neo-shadow-black hover:shadow-none hover:bg-black hover:text-[#CCFF00]"
+                      }`}
+                  >
+                    {product.is_sold ? 'SECURED' : <><CreditCard className="h-6 w-6 mr-3" /> BUY ASSET</>}
+                  </button>
+
+                  <button
+                    onClick={handleContactSeller}
+                    disabled={product.is_sold}
+                    className={`flex justify-center items-center py-4 border-[4px] border-black font-ranchers text-2xl uppercase tracking-widest transition-all ${product.is_sold ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-black text-white hover:translate-y-1 hover:translate-x-1 neo-shadow-volt hover:shadow-none hover:bg-[#CCFF00] hover:text-black"
+                      }`}
+                  >
+                    {product.is_sold ? 'LOCKED' : <><MessageCircle className="h-6 w-6 mr-3" /> PING COMMS</>}
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-black text-[#CCFF00] border-[4px] border-[#CCFF00] p-4 text-center mt-6">
+                  <p className="font-mono font-bold uppercase text-sm">✓ SELLER AUTHENTICATED. YOU OWN THIS REGISTRY.</p>
+                </div>
+              )}
             </div>
 
-            {/* Seller Info & Actions */}
-            {user?.id !== product.seller.id && (
-              <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 border border-white/20 shadow-2xl">
-                <h2 className="text-xl font-semibold text-white mb-6 flex items-center">
-                  <MessageCircle className="h-5 w-5 mr-2 text-orange-400" />
-                  Seller Information
-                </h2>
-                
-                <div className="flex items-center space-x-4 mb-8">
-                  <div className="relative">
-                    <img
-                      src={product.seller.avatar || `https://ui-avatars.com/api/?name=${product.seller.first_name}+${product.seller.last_name}&background=6366f1&color=fff`}
-                      alt={product.seller.first_name}
-                      className="w-16 h-16 rounded-full object-cover border-2 border-white/20 shadow-lg"
-                    />
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white/20"></div>
+            {/* Grid Bottom: Seller & Safety */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+              {/* Seller Panel */}
+              <div className="bg-white border-[6px] border-black p-6 neo-shadow-vault">
+                <h3 className="font-mono font-bold text-xs uppercase mb-4 pb-2 border-b-[4px] border-black text-black">SELLER DATAFILE</h3>
+
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-[#CCFF00] border-[4px] border-black shrink-0 relative sticker-rotate-2 flex items-center justify-center">
+                    {product.seller?.avatar ? (
+                      <img src={product.seller.avatar} alt="avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      <User className="h-8 w-8 text-black" />
+                    )}
+                    <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-black rounded-full border-[2px] border-white"></div>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-white">{product.seller.first_name} {product.seller.last_name}</h3>
-                    <p className="text-white/70">JU Student</p>
-                    <div className="flex items-center mt-1">
-                      <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                      <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                      <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                      <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                      <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                      <span className="text-white/70 text-sm ml-1">(Trusted)</span>
+                    <h4 className="font-ranchers text-2xl text-black uppercase leading-none mb-1">{product.seller?.first_name}</h4>
+                    <p className="font-mono text-[10px] font-bold text-gray-600 uppercase mb-2">JADAVPUR ALUMNI/STUDENT</p>
+                    <div className="flex bg-[#CCFF00] border-[2px] border-black px-2 py-0.5 w-max font-mono text-[10px] font-bold text-black items-center shadow-[2px_2px_0_0_#000]">
+                      <Star className="h-3 w-3 mr-1 fill-current" /> TRUST: {product.seller?.rating || 'NEW'}
                     </div>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                   <Button 
-                     onClick={handleBuyNow} 
-                     size="lg" 
-                     className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-4 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200"
-                   >
-                      <CreditCard className="h-5 w-5 mr-2" />
-                      Buy Now
-                   </Button>
-                   <Button 
-                     onClick={handleContactSeller} 
-                     size="lg" 
-                     className="bg-white/10 hover:bg-white/20 text-white border-2 border-white/20 hover:border-white/40 font-semibold py-4 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200"
-                   >
-                      <MessageCircle className="h-5 w-5 mr-2" />
-                      Chat with Seller
-                   </Button>
-                </div>
               </div>
-            )}
 
-            {/* Owner Message */}
-            {user?.id === product.seller.id && (
-                <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 backdrop-blur-lg border border-blue-400/30 rounded-3xl p-6 text-center shadow-2xl">
-                    <CheckCircle className="h-8 w-8 text-blue-400 mx-auto mb-3" />
-                    <p className="font-semibold text-blue-100 text-lg">This is your listing</p>
-                    <p className="text-blue-200/80 mt-2">You can manage it from your profile dashboard</p>
-                </div>
-            )}
+              {/* Safety Panel */}
+              <div className="bg-[#CCFF00] border-[6px] border-black p-6 neo-shadow-black">
+                <h3 className="font-mono font-bold text-xs uppercase mb-4 text-black border-b-[4px] border-black pb-2 flex items-center gap-2">
+                  <Shield className="h-4 w-4" /> PROTOCOL SAFETY
+                </h3>
 
-            {/* Login CTA */}
-            {!isAuthenticated && (
-                <div className="bg-gradient-to-r from-orange-500/20 to-yellow-500/20 backdrop-blur-lg border border-orange-400/30 rounded-3xl p-8 text-center shadow-2xl">
-                    <h3 className="text-xl font-semibold text-white mb-4">Ready to make a deal?</h3>
-                    <p className="text-white/80 mb-6">Join JUgaadu to buy this item or chat with the seller</p>
-                    <Link href="/login" passHref>
-                        <Button 
-                          size="lg" 
-                          className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold py-4 rounded-xl shadow-lg transform hover:scale-105 transition-all duration-200"
-                        >
-                          Login to Continue
-                        </Button>
-                    </Link>
-                </div>
-            )}
-          </div>
-        </div>
+                <ul className="space-y-3 font-mono text-[10px] font-bold text-black uppercase">
+                  <li className="flex items-start gap-2">
+                    <div className="w-3 h-3 bg-black mt-0.5 shrink-0" />
+                    ONLY USE INTERNAL COMMS CHANNEL.
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-3 h-3 bg-black mt-0.5 shrink-0" />
+                    PHYSICAL EXCHANGE @ CAMPUS ZONES.
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-3 h-3 bg-black mt-0.5 shrink-0" />
+                    REPORT ANOMALIES TO ADMIN.
+                  </li>
+                </ul>
+              </div>
 
-        {/* Safety Information */}
-        <div className="bg-white/5 backdrop-blur-lg rounded-3xl p-8 border border-white/10 shadow-2xl mt-12">
-          <div className="text-center mb-8">
-            <Shield className="h-12 w-12 text-green-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-white mb-2">Safe Trading Tips</h2>
-            <p className="text-white/70">Your safety is our priority at JUgaadu</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center p-6 bg-white/5 rounded-2xl border border-white/10">
-              <MessageCircle className="h-8 w-8 text-blue-400 mx-auto mb-3" />
-              <h3 className="font-semibold text-white mb-2">Chat First</h3>
-              <p className="text-white/70 text-sm">Always communicate through our platform before meeting</p>
-            </div>
-            <div className="text-center p-6 bg-white/5 rounded-2xl border border-white/10">
-              <MapPin className="h-8 w-8 text-purple-400 mx-auto mb-3" />
-              <h3 className="font-semibold text-white mb-2">Meet Safe</h3>
-              <p className="text-white/70 text-sm">Meet in public places within the JU campus</p>
-            </div>
-            <div className="text-center p-6 bg-white/5 rounded-2xl border border-white/10">
-              <Shield className="h-8 w-8 text-green-400 mx-auto mb-3" />
-              <h3 className="font-semibold text-white mb-2">Stay Protected</h3>
-              <p className="text-white/70 text-sm">Report any suspicious activity to our team</p>
             </div>
           </div>
         </div>
       </div>
-      
-      <Footer />
+
     </div>
   );
 }
