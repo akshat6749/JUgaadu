@@ -186,18 +186,20 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 
-# Channels settings for WebSocket support (Pusher)
+# Channels settings for WebSocket support
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "channels_pusher.PusherChannelLayer",
-        "CONFIG": {
-            "app_id": os.getenv('PUSHER_APP_ID'),
-            "key": os.getenv('PUSHER_KEY'),
-            "secret": os.getenv('PUSHER_SECRET'),
-            "cluster": os.getenv('PUSHER_CLUSTER'),
-            "ssl": True,
-        },
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
     },
+}
+
+# Pusher configuration (used directly via pusher SDK in signals/views)
+PUSHER_CONFIG = {
+    "app_id": os.getenv('PUSHER_APP_ID'),
+    "key": os.getenv('PUSHER_KEY'),
+    "secret": os.getenv('PUSHER_SECRET'),
+    "cluster": os.getenv('PUSHER_CLUSTER'),
+    "ssl": True,
 }
 
 

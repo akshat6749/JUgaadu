@@ -1,6 +1,7 @@
 "use client"
 import { useState, useRef, useEffect } from "react"
-import { Bot, X, Send, User, Sparkles } from "lucide-react"
+import { Bot, X, Send, Loader2 } from "lucide-react"
+import { sendChatbotMessage } from "@/utils/api"
 
 export default function Chatbot() {
     const [isOpen, setIsOpen] = useState(false)
@@ -8,6 +9,7 @@ export default function Chatbot() {
         { id: 1, text: "YO! I'M YOUR JUGAADU AI. NEED HELP FINDING SOMETHING ON CAMPUS?", sender: "ai" }
     ])
     const [input, setInput] = useState("")
+    const [isLoading, setIsLoading] = useState(false)
     const messagesEndRef = useRef(null)
 
     const toggleChat = () => setIsOpen(!isOpen)
@@ -20,23 +22,37 @@ export default function Chatbot() {
         scrollToBottom()
     }, [messages])
 
-    const handleSend = (e) => {
+    const handleSend = async (e) => {
         e.preventDefault()
-        if (!input.trim()) return
+        if (!input.trim() || isLoading) return
 
         const userMessage = { id: Date.now(), text: input, sender: "user" }
         setMessages(prev => [...prev, userMessage])
+        const currentInput = input
         setInput("")
+        setIsLoading(true)
 
-        // Mock AI response
-        setTimeout(() => {
+        try {
+            // Send message + history to backend
+            const history = messages.map(m => ({ text: m.text, sender: m.sender }))
+            const data = await sendChatbotMessage(currentInput, history)
+
             const aiMessage = {
                 id: Date.now() + 1,
-                text: "BRUH, I'M JUST A FRONTEND MOCKUP RIGHT NOW. THE BACKEND JUGAAD IS COMING SOON. STAY TUNED.",
+                text: data.reply || "SORRY, I COULDN'T PROCESS THAT. TRY AGAIN.",
                 sender: "ai"
             }
             setMessages(prev => [...prev, aiMessage])
-        }, 1000)
+        } catch (error) {
+            const errorMessage = {
+                id: Date.now() + 1,
+                text: "CONNECTION INTERRUPTED. THE AI ENGINE IS OFFLINE. TRY AGAIN LATER.",
+                sender: "ai"
+            }
+            setMessages(prev => [...prev, errorMessage])
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     return (
@@ -48,14 +64,14 @@ export default function Chatbot() {
             >
                 <Bot className="h-8 w-8 text-black group-hover:animate-bounce" />
                 <div className="absolute -top-2 -right-2 bg-black text-[#CCFF00] border-2 border-white px-2 py-0.5 text-[10px] font-mono font-bold animate-pulse">
-                    AI_BETA
+                    AI
                 </div>
             </button>
 
             {/* Chat Window */}
             {isOpen && (
                 <div className="fixed bottom-6 right-6 w-[90vw] md:w-[400px] h-[600px] max-h-[85vh] bg-white border-[6px] border-black neo-shadow-black z-50 flex flex-col font-mono text-black shadow-[16px_16px_0px_0px_#000000] animate-in slide-in-from-bottom-5 fade-in duration-300">
-                    {/* Output Header */}
+                    {/* Header */}
                     <div className="bg-black border-b-[4px] border-black flex justify-between items-center p-4">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-[#CCFF00] border-[3px] border-white flex items-center justify-center sticker-rotate-2">
@@ -88,14 +104,27 @@ export default function Chatbot() {
                                 )}
                                 <div
                                     className={`max-w-[80%] p-4 border-[4px] border-black font-bold uppercase text-sm ${msg.sender === 'user'
-                                            ? 'bg-[#CCFF00] text-black neo-shadow-black sticker-rotate-1'
-                                            : 'bg-white text-black neo-shadow-volt sticker-rotate-3'
+                                        ? 'bg-[#CCFF00] text-black neo-shadow-black sticker-rotate-1'
+                                        : 'bg-white text-black neo-shadow-volt sticker-rotate-3'
                                         }`}
                                 >
                                     {msg.text}
                                 </div>
                             </div>
                         ))}
+
+                        {/* Loading indicator */}
+                        {isLoading && (
+                            <div className="flex justify-start">
+                                <div className="w-8 h-8 bg-black shrink-0 border-[2px] border-[#CCFF00] flex items-center justify-center mr-2 mt-1">
+                                    <Bot className="h-4 w-4 text-[#CCFF00]" />
+                                </div>
+                                <div className="max-w-[80%] p-4 border-[4px] border-black bg-white text-black neo-shadow-volt font-bold uppercase text-sm flex items-center gap-2">
+                                    <Loader2 className="h-4 w-4 animate-spin" /> THINKING...
+                                </div>
+                            </div>
+                        )}
+
                         <div ref={messagesEndRef} />
                     </div>
 
@@ -107,11 +136,13 @@ export default function Chatbot() {
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 placeholder="ASK AI..."
-                                className="flex-1 bg-white border-[4px] border-[#CCFF00] text-black px-4 py-3 font-mono font-bold uppercase outline-none focus:bg-gray-100 placeholder:text-gray-400"
+                                disabled={isLoading}
+                                className="flex-1 bg-white border-[4px] border-[#CCFF00] text-black px-4 py-3 font-mono font-bold uppercase outline-none focus:bg-gray-100 placeholder:text-gray-400 disabled:opacity-50"
                             />
                             <button
                                 type="submit"
-                                className="bg-[#CCFF00] border-[4px] border-[#CCFF00] text-black px-4 py-3 font-bold hover:bg-white hover:border-white transition-colors flex items-center justify-center neo-shadow-volt active:translate-x-1 active:translate-y-1 active:shadow-none"
+                                disabled={isLoading}
+                                className="bg-[#CCFF00] border-[4px] border-[#CCFF00] text-black px-4 py-3 font-bold hover:bg-white hover:border-white transition-colors flex items-center justify-center neo-shadow-volt active:translate-x-1 active:translate-y-1 active:shadow-none disabled:opacity-50"
                             >
                                 <Send className="h-6 w-6" />
                             </button>

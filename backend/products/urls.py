@@ -18,4 +18,5 @@ urlpatterns = [
     path('products/verify-payment/', views.VerifyPaymentView.as_view(), name='verify-payment'),
     path('wishlist/', views.WishlistView.as_view(), name='wishlist'),
      path('products/generate-description/', views.generate_description_view, name='generate_description'),
+     path('chatbot/', views.chatbot_view, name='chatbot'),
 ]

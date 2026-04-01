@@ -126,11 +126,12 @@ def user_stats(request):
     total_views = products.aggregate(Sum('views_count'))['views_count__sum'] or 0
     total_likes = products.aggregate(Sum('likes_count'))['likes_count__sum'] or 0
     
-    # Message statistics (you'll need to implement this based on your chat model)
-    total_messages = 0  # Placeholder
+    # Message statistics
+    from chat.models import Message
+    total_messages = Message.objects.filter(sender=user).count()
     
-    # Profile statistics
-    profile = user.profile
+    # Profile statistics (use get_or_create to prevent crash)
+    profile, _ = UserProfile.objects.get_or_create(user=user)
     total_sales = profile.total_sales
     total_purchases = profile.total_purchases
     

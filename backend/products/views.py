@@ -13,6 +13,7 @@ from django.conf import settings
 import razorpay
 from .models import Payment
 from .serializers import PaymentSerializer
+from notifications.views import notify_product_liked, notify_product_sold
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 # Note: We are now handling filtering manually, so ProductFilter is no longer used here.
@@ -171,6 +172,8 @@ class ProductLikeToggleView(APIView):
         if created:
             product.likes_count += 1
             message, liked_status = 'Product liked', True
+            # Notify seller about the like
+            notify_product_liked(product, request.user)
         else:
             like.delete()
             product.likes_count = max(0, product.likes_count - 1)
@@ -255,6 +258,8 @@ class VerifyPaymentView(APIView):
             product = payment.product
             product.is_sold = True
             product.save()
+            # Notify seller about the sale
+            notify_product_sold(product, buyer=request.user)
             return Response({"status": "Payment successful"})
         except Exception as e:
             payment.status = 'failed'
@@ -289,7 +294,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 # Configure the Gemini client using the API key from your .env file
 try:
-    genai.configure(api_key="AIzaSyAx9SOHenRf9T-ZvnRrhhLH3EJIWqju6_s")
+    genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 except TypeError:
     raise Exception("GEMINI_API_KEY not found in environment variables.")
 
@@ -353,3 +358,55 @@ def generate_description_view(request):
         print(f"An unexpected error occurred: {e}")
         return JsonResponse({'error': 'An internal server error occurred.'}, status=500)
 
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def chatbot_view(request):
+    """
+    AI Chatbot endpoint using Gemini. Accepts a message and conversation history,
+    returns an AI response as the JugaaduAI campus marketplace assistant.
+    """
+    try:
+        data = json.loads(request.body)
+        user_message = data.get('message', '').strip()
+
+        if not user_message:
+            return JsonResponse({'error': 'Message is required.'}, status=400)
+
+        history = data.get('history', [])
+
+        model = genai.GenerativeModel('gemini-1.5-flash')
+
+        system_prompt = (
+            "You are JugaaduAI, the official AI assistant for the JUGAADU campus marketplace — "
+            "an exclusive platform for Jadavpur University students to buy and sell used items. "
+            "You help students find products, give tips on pricing, suggest how to write good listings, "
+            "and answer questions about how the marketplace works. "
+            "Keep responses SHORT (2-3 sentences max), FRIENDLY, and use a casual student tone. "
+            "If asked about something unrelated to the marketplace, gently redirect them. "
+            "Do NOT use markdown formatting — respond in plain text only."
+        )
+
+        # Build conversation parts for Gemini
+        contents = []
+        contents.append({"role": "user", "parts": [{"text": system_prompt}]})
+        contents.append({"role": "model", "parts": [{"text": "Got it! I'm JugaaduAI, ready to help JU students with the marketplace. What do you need?"}]})
+
+        # Add conversation history
+        for msg in history[-10:]:  # Keep last 10 messages for context
+            role = "user" if msg.get('sender') == 'user' else "model"
+            contents.append({"role": role, "parts": [{"text": msg.get('text', '')}]})
+
+        # Add the current user message
+        contents.append({"role": "user", "parts": [{"text": user_message}]})
+
+        response = model.generate_content(contents)
+        ai_text = response.text.strip()
+
+        return JsonResponse({'reply': ai_text})
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON in request body.'}, status=400)
+    except Exception as e:
+        print(f"Chatbot error: {e}")
+        return JsonResponse({'error': 'AI is currently unavailable. Try again later.'}, status=500)

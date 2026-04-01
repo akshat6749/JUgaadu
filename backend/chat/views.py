@@ -12,6 +12,7 @@ from .models import Conversation, Message
 from .serializers import ConversationSerializer, MessageSerializer, ConversationCreateSerializer
 from users.models import User
 from products.models import Product
+from notifications.views import notify_new_message
 
 
 class MyChatsView(generics.ListAPIView):
@@ -49,7 +50,11 @@ class CreateMessageView(generics.CreateAPIView):
         conversation = serializer.validated_data['conversation']
         if self.request.user not in conversation.participants.all():
             raise permissions.PermissionDenied("You are not a participant in this conversation.")
-        serializer.save(sender=self.request.user)
+        message = serializer.save(sender=self.request.user)
+        # Update conversation timestamp
+        conversation.save()
+        # Create notification for other participants
+        notify_new_message(conversation, self.request.user, message.content)
 
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
@@ -141,10 +146,10 @@ class PusherAuthView(APIView):
 
     def post(self, request, *args, **kwargs):
         pusher_client = pusher.Pusher(
-            app_id=settings.CHANNEL_LAYERS['default']['CONFIG']['app_id'],
-            key=settings.CHANNEL_LAYERS['default']['CONFIG']['key'],
-            secret=settings.CHANNEL_LAYERS['default']['CONFIG']['secret'],
-            cluster=settings.CHANNEL_LAYERS['default']['CONFIG']['cluster'],
+            app_id=settings.PUSHER_CONFIG['app_id'],
+            key=settings.PUSHER_CONFIG['key'],
+            secret=settings.PUSHER_CONFIG['secret'],
+            cluster=settings.PUSHER_CONFIG['cluster'],
             ssl=True
         )
 
@@ -170,4 +175,19 @@ class PusherAuthView(APIView):
             except (Conversation.DoesNotExist, ValueError):
                 return Response({'error': 'Conversation not found.'}, status=status.HTTP_404_NOT_FOUND)
         
+        # Authorize private notification channels
+        if channel_name.startswith('private-notifications-'):
+            try:
+                channel_user_id = int(channel_name.split('-')[-1])
+                if request.user.id != channel_user_id:
+                    return Response({'error': 'You are not authorized for this channel.'}, status=status.HTTP_403_FORBIDDEN)
+                
+                auth = pusher_client.authenticate(
+                    channel=channel_name,
+                    socket_id=socket_id
+                )
+                return Response(auth)
+            except ValueError:
+                return Response({'error': 'Invalid channel name.'}, status=status.HTTP_400_BAD_REQUEST)
+
         return Response({'error': 'Invalid channel name.'}, status=status.HTTP_400_BAD_REQUEST)

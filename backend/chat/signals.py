@@ -13,10 +13,10 @@ def message_created(sender, instance, created, **kwargs):
     if created:
         try:
             pusher_client = pusher.Pusher(
-                app_id=settings.CHANNEL_LAYERS['default']['CONFIG']['app_id'],
-                key=settings.CHANNEL_LAYERS['default']['CONFIG']['key'],
-                secret=settings.CHANNEL_LAYERS['default']['CONFIG']['secret'],
-                cluster=settings.CHANNEL_LAYERS['default']['CONFIG']['cluster'],
+                app_id=settings.PUSHER_CONFIG['app_id'],
+                key=settings.PUSHER_CONFIG['key'],
+                secret=settings.PUSHER_CONFIG['secret'],
+                cluster=settings.PUSHER_CONFIG['cluster'],
                 ssl=True
             )
 

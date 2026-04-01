@@ -2,6 +2,8 @@ from rest_framework import generics, status, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.utils import timezone
+from django.conf import settings
+import pusher
 from .models import Notification, NotificationPreference
 from .serializers import NotificationSerializer, NotificationPreferenceSerializer
 
@@ -82,9 +84,50 @@ class NotificationPreferenceView(generics.RetrieveUpdateAPIView):
         return preferences
 
 
-# Utility functions for creating notifications
+# ============ Pusher Push Helper ============
+
+def _get_pusher_client():
+    """Get a configured Pusher client instance."""
+    config = settings.PUSHER_CONFIG
+    return pusher.Pusher(
+        app_id=config['app_id'],
+        key=config['key'],
+        secret=config['secret'],
+        cluster=config['cluster'],
+        ssl=True
+    )
+
+
+def _push_notification(notification):
+    """Push a notification to the user via Pusher."""
+    try:
+        pusher_client = _get_pusher_client()
+        channel_name = f'private-notifications-{notification.recipient.id}'
+        
+        data = {
+            'id': notification.id,
+            'type': notification.notification_type,
+            'title': notification.title,
+            'message': notification.message,
+            'sender': {
+                'id': notification.sender.id,
+                'username': notification.sender.username,
+                'name': notification.sender.get_full_name(),
+            } if notification.sender else None,
+            'product_id': notification.product_id,
+            'conversation_id': notification.conversation_id,
+            'created_at': notification.created_at.isoformat(),
+        }
+        
+        pusher_client.trigger(channel_name, 'new-notification', data)
+    except Exception as e:
+        print(f"Error pushing notification via Pusher: {e}")
+
+
+# ============ Notification Creation Utilities ============
+
 def create_notification(recipient, notification_type, title, message, sender=None, product=None, conversation=None):
-    """Create a new notification"""
+    """Create a new notification and push it via Pusher."""
     
     notification = Notification.objects.create(
         recipient=recipient,
@@ -95,6 +138,9 @@ def create_notification(recipient, notification_type, title, message, sender=Non
         product=product,
         conversation=conversation
     )
+    
+    # Push real-time notification via Pusher
+    _push_notification(notification)
     
     return notification
 
@@ -119,6 +165,9 @@ def notify_new_message(conversation, sender, message_content):
 def notify_product_liked(product, liker):
     """Create notification for product like"""
     
+    if product.seller.id == liker.id:
+        return  # Don't notify if user likes their own product
+    
     create_notification(
         recipient=product.seller,
         sender=liker,
@@ -129,13 +178,14 @@ def notify_product_liked(product, liker):
     )
 
 
-def notify_product_sold(product):
+def notify_product_sold(product, buyer=None):
     """Create notification for product sold"""
     
     create_notification(
         recipient=product.seller,
+        sender=buyer,
         notification_type='product_sold',
         title='Product Sold',
-        message=f'Congratulations! Your product "{product.title}" has been marked as sold.',
+        message=f'Your product "{product.title}" has been sold!',
         product=product
     )
